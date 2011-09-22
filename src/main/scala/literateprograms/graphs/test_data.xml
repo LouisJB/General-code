@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<test_data>
+	<graph>
+		<arc from="Barcelona" to="Narbonne" cost="250" />
+		<arc from="Narbonne" to="Marseille" cost="260" />
+		<arc from="Narbonne" to="Toulouse" cost="150" />
+		<arc from="Narbonne" to="Geneve" cost="550" />
+		<arc from="Marseille" to="Geneve" cost="470" />
+		<arc from="Toulouse" to="Paris" cost="680" />
+		<arc from="Toulouse" to="Geneve" cost="700" />
+		<arc from="Geneve" to="Paris" cost="540" />
+		<arc from="Geneve" to="Lausanne" cost="64" />
+		<arc from="Lausanne" to="Paris" cost="536" />
+	</graph>
+	<sources>
+		<test source="Barcelona" dest="Lausanne"/>
+		<test source="Lausanne" dest="Barcelona"/>
+	</sources>
+</test_data>
+
