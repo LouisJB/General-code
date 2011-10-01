@@ -1,6 +1,10 @@
-#!/bin/bash
+package courses.m381
+
+/*
+#!/bin/sh
 exec scala "$0" "$@"
 !#
+*/
 
 import math._
 
@@ -36,7 +40,7 @@ case object And extends Connectives with BinExpr {
 }
 
 case object Or extends Connectives {
-  override def apply(ex1 : Expr, ex2 : Expr) = {
+  def apply(ex1 : Expr, ex2 : Expr) = {
     ex1 match {
       case True => True
       case _ => ex2 match {
@@ -48,7 +52,7 @@ case object Or extends Connectives {
 }
 
 case object Impl extends Connectives {
-  override def apply(ex1 : Expr, ex2 : Expr) = {
+  def apply(ex1 : Expr, ex2 : Expr) = {
     ex1 match {
       case False => True
       case _ => ex2 match {
@@ -162,4 +166,4 @@ object RichBoolean {
   implicit def toRichBoolean(b : Boolean) : RichBoolean = RichBoolean(b)
 }
 
-PredCalc.main(args)
+//PredCalc.main(args)

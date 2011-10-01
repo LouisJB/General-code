@@ -1,6 +1,10 @@
+package courses.m381
+
+/*
 #!/bin/sh
 exec scala "$0" "$@"
 !#
+*/
 
 import scala.math._
 
@@ -19,5 +23,5 @@ object CheckDigit {
   }
 }
 
-CheckDigit.main(args)
+//CheckDigit.main(args)
 

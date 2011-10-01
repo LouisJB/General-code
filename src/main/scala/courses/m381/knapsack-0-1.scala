@@ -1,6 +1,10 @@
+package courses.m381
+
+/*
 #!/bin/sh
-exec scala -deprecation "$0" "$@"
+exec scala "$0" "$@"
 !#
+*/
 
 // http://www.cse.unl.edu/~goddard/Courses/CSCE310J/Lectures/Lecture8-DynamicProgramming.pdf
 object Knapsack_0_1 {
@@ -55,5 +59,5 @@ object Knapsack_0_1 {
   }
 }
 
-Knapsack_0_1.main(args)
+//Knapsack_0_1.main(args)
 

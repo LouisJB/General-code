@@ -1,6 +1,10 @@
+package courses.m381
+
+/*
 #!/bin/sh
-exec scala -deprecation "$0" "$@"
+exec scala "$0" "$@"
 !#
+*/
 
 object SubsetSum {
 
@@ -37,5 +41,5 @@ object SubsetSum {
   }
 }
 
-SubsetSum.main(args)
+//SubsetSum.main(args)
 

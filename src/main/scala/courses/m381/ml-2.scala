@@ -1,6 +1,10 @@
+package courses.m381
+
+/*
 #!/bin/sh
-exec scala -deprecation "$0" "$@"
+exec scala "$0" "$@"
 !#
+*/
 
 object PrimitiveRecursion {
   
@@ -33,5 +37,5 @@ object PrimitiveRecursion {
   }
 }
 
-PrimitiveRecursion.main(args)
+//PrimitiveRecursion.main(args)
 

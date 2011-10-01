@@ -1,11 +1,15 @@
+package courses.m381
+
+/*
 #!/bin/sh
 exec scala "$0" "$@"
 !#
+*/
 
 import scala.math._
 import scala.annotation.tailrec
 
-object Primes {
+object PrimeFactors extends App {
 
   def pSieve(s : Stream[Int]) : Stream[Int] = { s.head #:: pSieve(s.filter(_ % s.head > 0)) }
 
@@ -37,8 +41,9 @@ object Primes {
   }
 
   def divisors(n : Int) = divisorLists(primeFactorPowers(n), List()).filter(_.size > 0).map(e => e.reduceLeft(_ * _))
+
+  println(Primes.primeFactors(args(0).toInt))
 }
 
-println(Primes.primeFactors(args(0).toInt))
 
 

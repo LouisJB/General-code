@@ -1,6 +1,10 @@
+package courses.m381
+
+/*
 #!/bin/sh
-exec scala -deprecation "$0" "$@"
+exec scala "$0" "$@"
 !#
+*/
 
 import math._
 
@@ -72,5 +76,5 @@ object LCS {
   }
 }
 
-LCS.main(args)
+//LCS.main(args)
 

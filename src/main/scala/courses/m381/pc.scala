@@ -1,6 +1,10 @@
-#!/bin/bash
+package courses.m381
+
+/*
+#!/bin/sh
 exec scala "$0" "$@"
 !#
+*/
 
 import scala.util.parsing.combinator._
 import scala.util.matching.Regex
@@ -137,4 +141,4 @@ object FormulaParser extends RegexParsers {
   }
 }
 
-FormulaParser.main(args)
+//FormulaParser.main(args)

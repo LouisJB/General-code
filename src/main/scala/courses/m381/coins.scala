@@ -1,6 +1,10 @@
-#!/bin/bash
-exec scala -deprecation "$0" "$@"
+package courses.m381
+
+/*
+#!/bin/sh
+exec scala "$0" "$@"
 !#
+*/
 
 // http://www.cse.unl.edu/~goddard/Courses/CSCE310J/Lectures/Lecture8-DynamicProgramming.pdf
 object CoinChange {
@@ -56,5 +60,5 @@ object CoinChange {
   }
 }
 
-CoinChange.main(args)
+//CoinChange.main(args)
 

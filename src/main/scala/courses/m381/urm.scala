@@ -1,6 +1,10 @@
+package courses.m381
+
+/*
 #!/bin/sh
-exec scala -deprecation "$0" "$@"
+exec scala "$0" "$@"
 !#
+*/
 
 import scala.io.Source._
 import java.io.File
@@ -226,5 +230,5 @@ object URM {
   def iToStr(ar : Array[I]) = ar.takeWhile(_ != UDEF).mkString(", ") 
 }
 
-URM.main(args)
+//URM.main(args)
 

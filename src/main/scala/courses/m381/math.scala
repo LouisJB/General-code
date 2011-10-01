@@ -1,6 +1,10 @@
+package courses.m381
+
+/*
 #!/bin/sh
 exec scala "$0" "$@"
 !#
+*/
 
 import scala.math._
 import scala.annotation.tailrec
@@ -587,6 +591,6 @@ object Congruences {
 //Primes.main(args)
 //Sorting.main(args)
 //Polynomials.main(args)
-M381.main(args)
+//M381.main(args)
 
 

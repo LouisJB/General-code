@@ -1,8 +1,12 @@
-#!/bin/sh
-exec scala -deprecation "$0" "$@"
-!#
+package courses.m381
 
-object PrimitiveRecursion {
+/*
+#!/bin/sh
+exec scala "$0" "$@"
+!#
+*/
+
+object PrimitiveRecursion2 {
 
   // ***** Problem 3.1
   // The function fac : N −→ N given by fac(n) = n! is defined by primitive 
@@ -40,5 +44,5 @@ object PrimitiveRecursion {
   }
 }
 
-PrimitiveRecursion.main(args)
+//PrimitiveRecursion.main(args)
 
