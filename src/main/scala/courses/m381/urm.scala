@@ -14,6 +14,9 @@ import scala.annotation.tailrec
 object URM {
 
   type Register = Int
+
+  // program arguments
+  // example run programs/dfoobar.urm data "1 1, 2 3"
   val DECODE_CMD = "decode"
   val RUN_CMD = "run"
   val DATA_CMD = "data"

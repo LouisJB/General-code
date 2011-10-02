@@ -1,0 +1,16 @@
+# Program to calculate the characteristi function of odd(n) for a given n in R1
+
+# program instructions
+def isOdd {
+1 J(1, 2, 6)
+2 S(2)
+3 J(1, 2, 7)
+4 S(2)
+5 J(1, 1, 1)
+6 Z(1)
+}
+
+data
+
+# program data, register n = 3
+1 3
