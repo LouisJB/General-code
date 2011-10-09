@@ -299,7 +299,7 @@ object Distributions {
 object BoxMuller {
   def Z1(u1 : Double, u2 : Double) = pow(-2.0 * log(u1), 0.5) * sin(2.0 * Pi * u2)
   def Z0(u1 : Double, u2 : Double) = pow(-2.0 * log(u1), 0.5) * cos(2.0 * Pi * u2)
-  def getBoxMuller() = { val u1 = Random.nextDouble; val u2 = Random.nextDouble; Z0(u1, u2) }
+  def getBoxMuller = { val u1 = Random.nextDouble(); val u2 = Random.nextDouble(); Z0(u1, u2) }
 }
 
 object Quadratics {
@@ -310,20 +310,30 @@ object Quadratics {
 object Primes {
 
   def pSieve(s : Stream[Int]) : Stream[Int] = { s.head #:: pSieve(s.filter(_ % s.head > 0)) }
-
   val primeStream = pSieve(Stream.from(2))
 
-  def pf(ps : Stream[Int])(n : Int) : List[Int] = {
+  def pfs(ps : Stream[Int])(n : Int) : List[Int] = {
     val p = ps.head
     if (n < p) Nil
-    else if ((n % p) == 0) p :: pf(ps)(n/p)
-    else pf(ps.drop(1))(n)
+    else if ((n % p) == 0) p :: pfs(ps)(n/p)
+    else pfs(ps.drop(1))(n)
   }
 
-  val pf1 = pf(primeStream) _
-  def primeDecomposition(n : Int) = pf1(n).groupBy(x => x).mapValues(x => x.size)
+  val pf = pfs(primeStream) _
+  def primeDecomposition(n : Int) = pf(n).groupBy(x => x).mapValues(x => x.size)
+
+  def pf2 (n : Int) : List[Int] = pf2(n, primeStream)
+  def pf2(n : Int, ps : Stream[Int]) : List[Int] = {
+    if (n <= 1) Nil
+    else {
+      val p = ps.head
+      if (n % p == 0) p :: pf2(n / p, ps)
+      else pf2(n, ps.drop(1))
+    }
+  }
 
   // return a list of prime factors...
+  // imperitive style
   def primeFactors(n : Int) : List[Int] = {
 
     var primeFactors = List[Int]()
@@ -353,11 +363,12 @@ object Primes {
   def pi(n : Int) = primeStream.takeWhile(x => x < n).size
   
   def main(args : Array[String]) {
+    val n = args(0).toInt
     println("primes " + primeStream.take(100).toList.mkString(", "))
-    println("primeFactors = " +  primeFactors(args(0).toInt))
-    println("primeFactorPowers = " +  primeFactorPowers(args(0).toInt))
-    println("divisorLists = " + divisorLists(primeFactorPowers(args(0).toInt), List()))
-    println("divisors = " + divisors(args(0).toInt))
+    println("primeFactors = " +  primeFactors(n))
+    println("primeFactorPowers = " +  primeFactorPowers(n))
+    println("divisorLists = " + divisorLists(primeFactorPowers(n), List()))
+    println("divisors = " + divisors(n))
     println("pi n " + (2 to 4).map(x => { val y = math.pow(10, x).toInt; (y, pi(y)) } ))
   }
 }
@@ -452,7 +463,7 @@ object Sorting {
     ar
   }
 
-  def swap[T](vs : Array[T], a : Int, b : Int) = { val t = vs(a); vs(a) = vs(b); vs(b) = t }
+  def swap[T](vs : Array[T], a : Int, b : Int) { val t = vs(a); vs(a) = vs(b); vs(b) = t }
 
   // insersion sort, recursive using lists...
   def insert(x : Int, xs : List[Int]) : List[Int] = xs match { case Nil => x :: Nil; case (y :: ys) => if (x < y) x :: xs else y :: insert(x, ys) }
@@ -488,7 +499,7 @@ object Trees {
       inOrder(right, f)
   }
 
-  def main(args : Array[String]) = {
+  def main(args : Array[String]) {
 
     val tree1 = Tree(1,
       Tree(2,
@@ -569,7 +580,7 @@ object Polynomials {
 
   def findRoots(p : Polynomial, m : Int) = (0 to m).filter(x => eval(p, x) % m == 0)
 
-  def main(args : Array[String]) = {
+  def main(args : Array[String]) {
     
     val p1 = Polynomial(List(Term(1, 2), Term(4, 1), Term(-4, 0)))
     val p2 = Polynomial(List(Term(1, 3), Term(2, 2), Term(1,1), Term(3, 0)))

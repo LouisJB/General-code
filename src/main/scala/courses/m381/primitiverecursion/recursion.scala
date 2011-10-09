@@ -1,6 +1,6 @@
 package courses.m381.primitiverecursion
 
-object recursion {
+object Recursion {
 
   // basic primitives
   def Z = 0
@@ -19,8 +19,17 @@ object recursion {
   def sg(n : Int) = if (n > 0) 1 else 0
   def sgbar(n : Int) = if (n == 0) 1 else 0
 
+  def pred(a : Int) = if (a > 0) a - 1 else 0
+  
   // characteristics
   def Xeq(n : Int,  m : Int) = sgbar(adf(n, m))
+
+  def Xgte(n : Int,  m : Int) = sgbar(cutOfSub(m, n))
+  def Xlte(n : Int,  m : Int) = sgbar(cutOfSub(n, m))
+
+  def Xgt(n : Int,  m : Int) = sg(cutOfSub(n, m))
+  def Xlt(n : Int,  m : Int) = sg(cutOfSub(m, n))
+
 
   def rem(n : Int, m : Int) : Int =
     if (n == 0) 0
@@ -93,6 +102,17 @@ object recursion {
       (n1 : Int,  n2 : Int,  n3 : Int) => succ(U33(n1, n2, n3)))
   }
 
+  // cutofsub in terms of pred
+  def cos(n : Int, m : Int) : Int = if (m == 0) {
+    println("m = 0, returning 0")
+    0
+  } else {
+    println("evaluating pred(c(%d, %d))".format(n, m-1))
+    val v = pred(cos(n, m-1))
+    println("evaluating pred(c(%d, %d)) = %d".format(n, m-1, v))
+    v
+  }
+
   def cutOfSub(a : Int, b : Int) = if (a < b) 0 else a - b
   def max(a : Int, b : Int) = cutOfSub(a, b) + b
   def min(a : Int, b : Int) = cutOfSub(a, cutOfSub(a, b))
@@ -124,5 +144,21 @@ object recursion {
 
     println("quot 6, 3 = " + quot(6, 3))
     println("quot 13, 4 = " + quot(13, 4))
+  
+    println("cos = " + cos(3, 5))
+    
+    println("Xgte 5, 6 = " +Xgte(5, 6))
+    println("Xgte 6, 5 = " +Xgte(6, 5))
+
+    println("Xlte 5, 6 = " +Xlte(5, 6))
+    println("Xlte 6, 5 = " +Xlte(6, 5))
+
+    println("Xgt 6, 5 = " +Xgt(6, 5))
+    println("Xgt 5, 6 = " +Xgt(5, 6))
+    println("Xgt 5, 5 = " +Xgt(5, 5))
+
+    println("Xlt 5, 6 = " +Xlt(5, 6))
+    println("Xlt 6, 5 = " +Xlt(6, 5))
+    println("Xlt 5, 5 = " +Xlt(5, 5))
   }
 }
