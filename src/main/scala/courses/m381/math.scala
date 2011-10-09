@@ -475,7 +475,7 @@ object Sorting {
  
     val ar = Array(5, 7, 3, 5, 2, 3, 1, 9, 1, 5, 2, 0)
     println("Array = " + ar.toList.mkString(", "))
-    println("quicksortI = " + quicksortI(ar.clone).toList.mkString(", "))
+    println("quicksortI = " + quicksortI(ar.clone()).toList.mkString(", "))
     println("quicksortI - kth = " + quicksortI(ar, 5).toList.take(5).mkString(", "))
     println("quicksortI - kth = " + quicksortI(ar, 7).toList.take(7).mkString(", "))
   
@@ -491,12 +491,14 @@ object Trees {
   case object TreeNil extends TreeBase[Nothing]
   case class Tree[+T](value: T, left: TreeBase[T], right: TreeBase[T]) extends TreeBase[T]
 
-  def inOrder[A](t: TreeBase[A], f: Tree[A] => Unit) : Unit = t match {
-    case TreeNil =>
-    case tree @ Tree(x, left, right) =>
-      inOrder(left, f)
-      f(tree)
-      inOrder(right, f)
+  def inOrder[A](t: TreeBase[A], f: Tree[A] => Unit) {
+    t match {
+      case TreeNil =>
+      case tree @ Tree(x, left, right) =>
+        inOrder(left, f)
+        f(tree)
+        inOrder(right, f)
+    }
   }
 
   def main(args : Array[String]) {
@@ -520,7 +522,7 @@ object Trees {
   def inOrderIter[T](t : TreeBase[T]) {
     val s = new java.util.Stack[TreeBase[T]]()
     var n = t
-    while (!s.isEmpty() || n != TreeNil) {
+    while (!s.isEmpty || n != TreeNil) {
       n match {
         case x @ Tree(_, l, _) => {
           s.push(x)
@@ -597,6 +599,21 @@ object Congruences {
   case class LinCongruence(a : Int, b : Int, mod : Int) {
     def eval(x : Int) = ((a * x) - b) % mod
   }
+}
+
+object Collatz {
+
+  def collatzSeq(n : Int) : List[Int] =
+    if (n == 1) n :: Nil
+    else if (n % 2 == 1) n :: collatzSeq(3 * n + 1)
+    else n :: collatzSeq(n / 2)
+
+  def collatz(n : Int) : Int =
+    if (n == 1) 1
+    else if (n % 2 == 1) 1 + collatz(3 * n + 1)
+    else 1 + collatz(n / 2)
+
+  def maxCollatz(n : Int) = (1 to n).map(x => (x, collatz(x))).sortWith(_._2 > _._2).head
 }
 
 //Primes.main(args)
