@@ -31,6 +31,9 @@ object M381 {
   def tau(n : Int) = (1 to n).filter(x => (n % x) == 0).size
   def sigma(n : Int) = (1 to n).filter(x => (n % x) == 0).sum
   def phi(n : Int) = (1 to n).filter(a => gcd(a, n) == 1).size
+  def isAbundant(n : Int) = sigma(n) > 2*n
+  def isPerfect(n : Int) = sigma(n) == 2*n
+  def isDeficient(n : Int) = sigma(n) < 2*n
   def residues(n : Int) = (0 to n - 1)
   def lpresidues(n : Int) = ((-1 * (n/2)) to n / 2)
   def reducedResidues(n : Int) = (1 to n).filter(a => gcd(a, n) == 1)
@@ -55,6 +58,13 @@ object M381 {
   // Theorem 2.1 - the order of integer
   def order(a : Int, p : Int) = if (gcd(a, p) == 1) (1 to p).find(x => pow(a, x) % p == 1) else None
 
+  def decEx(n : Int, s : Int, r : Int = 1) : List[Int] =
+    if (s == 0) Nil
+    else {
+      val x = r / n;
+      x :: decEx(n, s-1, (r - (x * n)) * 10)
+    }
+
   // Theorem 2.2 - length of the decimal cycle for 1/p
   def primeDecimalCycleLen(p : Int) = if (p == 2 || p == 5) 1 else order(10, p)
 
@@ -76,7 +86,6 @@ object M381 {
 
   def primativeRoots(m : Int) = (1 to m).map(n => if (order(n, m) == Some(phi(m))) Some(n) else None).flatten
   def noPrimativeRoots(n : Int) = phi(phi(n))
-
 
   // continued fractions (Theorem 1.2 NT unit 7)
   case class FCF(ls : List[Int]) { 

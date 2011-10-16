@@ -19,7 +19,8 @@ case class UnaryOp(operator : Expr, arg : Expr) extends Expr
 case class BinaryOp(operator : BinExpr, left : Expr, right : Expr) extends Expr
 
 trait Connectives extends Expr
-case object Not extends Connectives {
+
+case object ¬ extends Connectives {
   override def apply(ex : Expr) = {
     ex match {
       case True => False; case False => True
@@ -27,7 +28,7 @@ case object Not extends Connectives {
   }
 }
 
-case object And extends Connectives with BinExpr {
+case object ∧ extends Connectives with BinExpr {
   override def apply(ex1 : Expr, ex2 : Expr) = {
     ex1 match {
       case False => False
@@ -39,7 +40,7 @@ case object And extends Connectives with BinExpr {
   }
 }
 
-case object Or extends Connectives {
+case object v extends Connectives {
   def apply(ex1 : Expr, ex2 : Expr) = {
     ex1 match {
       case True => True
@@ -87,13 +88,13 @@ object PredCalc {
 
   def main(args : Array[String]) {
 
-    val ex1 = eval(UnaryOp(Not, True))
+    val ex1 = eval(UnaryOp(¬, True))
     println("value = " + ex1)
  
-    val ex2 = eval(UnaryOp(Not, UnaryOp(Not, True)))
+    val ex2 = eval(UnaryOp(¬, UnaryOp(¬, True)))
     println("value = " + ex2)
 
-    val ex3 = eval(BinaryOp(And, True, False))
+    val ex3 = eval(BinaryOp(∧, True, False))
     println("value = " + ex3)
   }
 

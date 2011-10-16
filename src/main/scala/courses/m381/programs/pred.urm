@@ -1,0 +1,17 @@
+# Program to calculate pred(a) for given a in register 1 such that r1 = a-1 when a > 0 and 0 otherwise
+
+# program instructions
+def pred {
+1 J(1, 2, 6)
+2 S(2)
+3 J(1, 2, 6)
+4 S(3)
+5 J(1, 1, 1)
+6 C(3, 1)
+}
+
+data
+
+# program data, register a = 1, register b = 2
+1 2
+

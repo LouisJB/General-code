@@ -1,6 +1,6 @@
 package courses.m381.primitiverecursion
 
-object Recursion {
+object PrimitiveRecursiveFunctions {
 
   // basic primitives
   def Z = 0
