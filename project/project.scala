@@ -10,6 +10,10 @@ object ProjectSettings extends Build{
   val scalaTest = "org.scalatest" % "scalatest" % "1.4.RC2" % "test"  
   val scalacheck = "org.scala-tools.testing" % "scalacheck_2.9.1.RC3" % "1.9" // % "test" 
   val scalaZ = "org.scalaz" % "scalaz-full_2.9.1" % "6.0.3"
+  val colt = "colt" %  "colt" % "1.2.0"
+  val apacheMath = "org.apache.commons" % "commons-math" % "2.0"
+
+  val dependencies = Seq(scalaTest, scalacheck, scalaSwing, scalaZ, colt, apacheMath)
 
   // ***** repositories ***** 
   // required because Ivy doesn't pull repositories from poms
@@ -20,7 +24,7 @@ object ProjectSettings extends Build{
 
   lazy val defaultSettings = Defaults.defaultSettings ++ Seq(
     scalaVersion := "2.9.1",
-    libraryDependencies ++= Seq(scalaTest, scalacheck, scalaSwing, scalaZ),
+    libraryDependencies ++= dependencies,
     retrieveManaged := true
   )
 
