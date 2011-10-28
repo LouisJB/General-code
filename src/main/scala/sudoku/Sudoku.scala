@@ -3,6 +3,7 @@ package sudoku
 import annotation.tailrec
 import sudoku.Sudoku._
 import RichList._
+import courses.m381.v
 
 object RichList {
   implicit def toRichList[T](ls : List[T]) = RichList(ls)
@@ -116,7 +117,16 @@ object Sudoku {
     else (1 to v.size).toList
   }
 }
-
+object SudokuPuzzle {
+  implicit def createPuzzle(p : (String, Vector[(_, _, _, _, _, _, _, _, _)])) : SudokuPuzzle = {
+    val rows : Vector[Vector[Cell]] = 
+      p._2.map(r => Vector[Cell]() ++ r.productIterator.map(c => c match {
+        case x : Cell => x
+        case n : Int => FinalCell(n)
+      }))
+    SudokuPuzzle(p._1, rows)
+  }
+}
 case class SudokuPuzzle(name : String = "", squares : Vector[Vector[Cell]]) extends Board with Puzzle {
   import Sudoku._
   val size = squares.size
@@ -180,6 +190,7 @@ case class FinalCell(n : Int) extends Cell {
 
 object SudokuTest extends App {
   import Sudoku._
+  import SudokuPuzzle._
   
   def solve(puzzle : SudokuPuzzle) {
     val s = puzzle.solve
@@ -324,4 +335,45 @@ object SudokuTest extends App {
       Vector(3, N, 4, N, 5, N, 6, N, 7)
     )
   ))
+
+  // Rating Program: gsf's sudoku q1
+  // Rating: 99529
+  // Poster: eleven
+  // Label: HardestSudokusThread-02085;Discrepancy   
+  /*
+    1 2 . | 4 . . | 3 . .
+    3 . . | . 1 . | . 5 .
+    . . 6 | . . . | 1 . .
+    ------+-------+------
+    7 . . | . 9 . | . . .
+    . 4 . | 6 . 3 | . . .
+    . . 3 | . . 2 | . . .
+    ------+-------+------
+    5 . . | . 8 . | 7 . .
+    . . 7 | . . . | . . 5
+    . . . | . . . | . 9 8
+  */
+  solve(("p12-super-hard", Vector(
+      (1, 2, N, 4, N, N, 3, N, N),
+      (3, N, N, N, 1, N, N, 5, N),
+      (N, N, 6, N, N, N, 1, N, N),
+      (7, N, N, N, 9, N, N, N, N),
+      (N, 4, N, 6, N, 3, N, N, N),
+      (N, N, 3, N, N, 2, N, N, N),
+      (5, N, N, N, 8, N, 7, N, N),
+      (N, N, 7, N, N, N, N, N, 5),
+      (N, N, N, N, N, N, N, 9, 8))
+  ))
+/*
+  solves as:
+  1 2 9 4 5 6 3 8 7
+  3 7 4 2 1 8 9 5 6
+  8 5 6 9 3 7 1 4 2
+  7 1 8 5 9 4 6 2 3
+  2 4 5 6 7 3 8 1 9
+  6 9 3 8 4 2 5 7 1
+  5 6 2 1 8 9 7 3 4
+  9 8 7 3 2 1 4 6 5
+  4 3 1 7 6 5 2 9 8
+*/
 }
