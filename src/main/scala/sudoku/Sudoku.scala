@@ -3,7 +3,6 @@ package sudoku
 import annotation.tailrec
 import sudoku.Sudoku._
 import RichList._
-import courses.m381.v
 
 object RichList {
   implicit def toRichList[T](ls : List[T]) = RichList(ls)
@@ -72,7 +71,7 @@ object Sudoku {
                 case ChoiceCell(n) if (possibleDigits == n) => None
                 case _ => {
                   if (possibleDigits.size > 1)
-                    Some(r,  c,  ChoiceCell(possibleDigits))
+                    Some(r, c, ChoiceCell(possibleDigits))
                   else if (possibleDigits.size == 1)
                     Some(r, c, FinalCell(possibleDigits.head))
                   else return UnsolvablePuzzle
@@ -84,7 +83,7 @@ object Sudoku {
         })
       }).toList
 
-    if (changes.isEmpty) // && !b.isSolved)
+    if (changes.isEmpty)
       b.permute
     else
       changes.foldRight(b)((c, t) => t.update(c._1, c._2, c._3))
@@ -101,7 +100,7 @@ object Sudoku {
     (1 to v.size).filterNot(x => s.contains(x)).toList
   }
 
-  // assumption, using 3x3 unique grids when size > 3
+  // assumption: using 3x3 unique grid constraint when size > 3
   def missingDigits(r : Int, c : Int, v : Vector[Vector[Cell]]) : List[Int] = {
     if (v.size > 3) {
       def getPos(x : Int) = ((x / 3) * 3)
