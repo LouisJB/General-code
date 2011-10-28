@@ -38,11 +38,13 @@ object RandomVariables {
 object TestBS extends App {
   import BlackScholes._
   
-  val value = (0.0 to 1.0 by 0.1).map(t => {
-    ("t = " + t, undiscountedOptionPrice(F = 20.0, X = 10.0, callPut = Call, T = t, vol = 1.0))
+  val values = (0 to 100 by 1).map(t => {
+    (1.0 to 10.0 by 1.0).map(vol => {
+      ("t = " + t/100.0 + ", vol = " + vol, ", price %.2f".format(undiscountedOptionPrice(F = 20.0, X = 10.0, callPut = Call, T = t/100.0, vol = vol)))
+    })
   })
   
-  println("call 1 = \n" + value.mkString("\n"))
+  println("call 1 = \n" + values.mkString("\n"))
 }
 
 // F = spot, X = strike
