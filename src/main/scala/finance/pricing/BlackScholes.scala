@@ -1,5 +1,4 @@
-package finance
-package starling.models
+package finance.pricing
 
 import math._
 import cern.jet.random.{Uniform, Normal}
