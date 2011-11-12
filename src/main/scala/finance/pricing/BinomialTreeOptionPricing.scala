@@ -2,10 +2,76 @@ package finance.pricing
 
 import math._
 
+trait Direction
+case object CallOption extends Direction
+case object PutOption extends Direction
+
+trait OptionType
+case object AmericanOption extends OptionType
+case object EuropeanOption extends OptionType
+case object BermudanOption extends OptionType
+
 case class BinomialTreeOptionPricing(
   n : Int  // no of time steps (height of binomial tree)
 ) {
   import Utils._
+
+  def optionPrice(
+      d : Direction,
+      ot : OptionType,  // optionType
+      s : Double,       // spot
+      x : Double,       // strike
+      t : Double,       // time
+      r : Double,       // risk free rate
+      σ : Double        // vol = sigma (std-dev)
+    ) : Double = {
+
+    val p = Array.tabulate(n+1)(x => 0.0)
+    val q = 0.0
+    val dT = t / n
+    val up = exp(σ * sqrt(dT))
+
+    val p0 = (up * exp(-r * dT) - exp(-q * dT)) * up / (pow(up, 2) - 1)
+    val p1 = exp(-r * dT) - p0
+
+    // initial values at time T
+    for (i <- (0 to n)) {
+      d match {
+        case PutOption => {
+          p(i) = x - s * pow(up, 2*i - n)
+          if (p(i) < 0) p(i) = 0
+        }
+        case CallOption => {
+          p(i) = s * pow(up, 2*i - n) - x
+          if (p(i) < 0) p(i) = 0
+        }
+      }
+    }
+
+    // move to earlier times
+    for (j <- (n-1 to 0  by -1)) {
+      for (i <- 0 to j) {
+        p(i) = p0 * p(i) + p1 * p(i+1)  // binomial value
+        ot match {
+          case AmericanOption => {
+            d match {
+              case PutOption => {
+                val exercise = x - s * pow(up, 2*i - j) // exercise value
+                if (p(i) < exercise) p(i) = exercise
+              }
+              case CallOption => {
+              }
+            }
+          }
+          case EuropeanOption =>
+          case _ => throw new Exception("Unsupported option type")
+        }
+      }
+    }
+    p(0)
+  }
+
+  // suffers from rounding problems...
   def callOptionPrice(
     s : Double,   // spot
     x : Double,   // strike
@@ -23,7 +89,7 @@ case class BinomialTreeOptionPricing(
 
     var acc : Double = 0.0
     for(k <- 0 to n by 1) {
-     val coeff : Double = binomialCoefficient(n, k)
+     val coeff : Double = C(n, k)
       var z : Double = coeff * pow(q, k) * pow(1 - q, n - k) * (s * pow(u, k) * pow(d, n - k) - x)
       if (z > 0)
         acc = acc + z
@@ -34,7 +100,7 @@ case class BinomialTreeOptionPricing(
 
 object Utils {
   import Numeric.Implicits._
-  def binomialCoefficient(n : Int, k : Int) = (1 to k).foldLeft(1)((s, e) => (s * (n - e + 1)) / e)
+  def C(n : Int, k : Int) = (1 to k).foldLeft(1)((s, e) => (s * (n - e + 1)) / e) // Binomial Coefficient C(n, k)
   def average[T : Numeric](ls : List[T]) : Double = ls.sum.toDouble / ls.size.toDouble
   def stdDev[T : Numeric](ls : List[T]) : Double = pow(ls.map(x => pow((x.toDouble - average(ls)), 2)).sum / ls.size, 0.5)
   def variance[T : Numeric](ls : List[T]) = ls.map(x => pow((x.toDouble - average(ls)), 2)).sum / ls.size
@@ -42,6 +108,7 @@ object Utils {
 }
 object BinomialTreeOptionPricing extends App {
   import BlackScholes._
+  import Utils._
 
   def formatParams(s : Double, x : Double, t : Double, r : Double, σ : Double) = "Running s2, s = %.2f, x = %.2f, t = %.2f, r = %.2f, σ = %.2f".format(s, x, t, r, σ)
   
@@ -65,6 +132,19 @@ object BinomialTreeOptionPricing extends App {
     val btop1 = BinomialTreeOptionPricing(10)
     val p1 = btop1.callOptionPrice(s, x, t, r, σ)
     println("BOPM callOptionPrice = " + p1)
+
+    val btop2 = BinomialTreeOptionPricing(1000)
+    val ceop = btop2.optionPrice(CallOption, EuropeanOption, s, x, t, r, σ)
+    println("put european option price = " + ceop)
+
+    val caop = btop2.optionPrice(CallOption, AmericanOption, s, x, t, r, σ)
+    println("put american option price = " + caop)
+
+    val peop = btop2.optionPrice(PutOption, EuropeanOption, s, x, t, r, σ)
+    println("put european option price = " + peop)
+
+    val paop = btop2.optionPrice(PutOption, AmericanOption, s, x, t, r, σ)
+    println("put american option price = " + paop)
   }
 
   // example taken from Hull (8.0th ed, p254), 1 step binomial
@@ -73,7 +153,7 @@ object BinomialTreeOptionPricing extends App {
     val x = 21.0
     val t = 0.25
     val r = 0.12
-    val σ = .2 //stdDev(18.0 :: 22.0 :: Nil) / s
+    val σ = .2 // stdDev(18.0 :: 22.0 :: Nil) / s
     println("\nRunning s2 with: " + formatParams(s, x, t, r, σ))
 
     import BlackScholes._
@@ -81,7 +161,7 @@ object BinomialTreeOptionPricing extends App {
     val dop = value(Call, s, x, σ, r, t)
     println("BS callOptionPrice = " + uop)
     
-    val btop1 = BinomialTreeOptionPricing(25)
+    val btop1 = BinomialTreeOptionPricing(5)
     val p1 = btop1.callOptionPrice(s, x, t, r, σ)
     println("BOPM callOptionPrice = " + p1)
   }
