@@ -1,6 +1,7 @@
 package finance.pricing
 
 import math._
+import mathutils._
 
 trait Direction
 case object CallOption extends Direction
@@ -14,7 +15,7 @@ case object BermudanOption extends OptionType
 case class BinomialTreeOptionPricing(
   n : Int  // no of time steps (height of binomial tree)
 ) {
-  import Utils._
+  import Binomial._
 
   def optionPrice(
       d : Direction,
@@ -98,17 +99,8 @@ case class BinomialTreeOptionPricing(
   }
 }
 
-object Utils {
-  import Numeric.Implicits._
-  def C(n : Int, k : Int) = (1 to k).foldLeft(1)((s, e) => (s * (n - e + 1)) / e) // Binomial Coefficient C(n, k)
-  def average[T : Numeric](ls : List[T]) : Double = ls.sum.toDouble / ls.size.toDouble
-  def stdDev[T : Numeric](ls : List[T]) : Double = pow(ls.map(x => pow((x.toDouble - average(ls)), 2)).sum / ls.size, 0.5)
-  def variance[T : Numeric](ls : List[T]) = ls.map(x => pow((x.toDouble - average(ls)), 2)).sum / ls.size
-  def continuousInterest(r : Double, t : Double) = exp(r * t)
-}
 object BinomialTreeOptionPricing extends App {
   import BlackScholes._
-  import Utils._
 
   def formatParams(s : Double, x : Double, t : Double, r : Double, σ : Double) = "Running s2, s = %.2f, x = %.2f, t = %.2f, r = %.2f, σ = %.2f".format(s, x, t, r, σ)
   
@@ -135,10 +127,10 @@ object BinomialTreeOptionPricing extends App {
 
     val btop2 = BinomialTreeOptionPricing(1000)
     val ceop = btop2.optionPrice(CallOption, EuropeanOption, s, x, t, r, σ)
-    println("put european option price = " + ceop)
+    println("call european option price = " + ceop)
 
     val caop = btop2.optionPrice(CallOption, AmericanOption, s, x, t, r, σ)
-    println("put american option price = " + caop)
+    println("call american option price = " + caop)
 
     val peop = btop2.optionPrice(PutOption, EuropeanOption, s, x, t, r, σ)
     println("put european option price = " + peop)

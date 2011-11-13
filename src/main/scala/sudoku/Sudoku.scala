@@ -5,11 +5,10 @@ import sudoku.Sudoku._
 import RichList._
 
 object RichList {
-  implicit def toRichList[T](ls : List[T]) = RichList(ls)
-}
-case class RichList[T](ls : List[T]) {
   import util.Random.nextInt
-  def permute = ls.map(x => (x, nextInt)).sortWith(_._2 > _._2).map(_._1)
+  implicit def toRichList[T](ls : List[T]) = new Object {
+    def permute = ls.map(x => (x, nextInt)).sortWith(_._2 > _._2).map(_._1)
+  }
 }
 
 object Sudoku {

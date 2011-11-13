@@ -303,86 +303,29 @@ case class DefaultMatchingEngine(
     order.orderType match {
       case LimitOrder => {
         limitOrder(book, order, matchedPriceOrders)
-          /*
-          offerBook.sortedOrders.filter(kv => kv._1.value <= order.price.value).values.flatten match {
-            case Nil => order
-            case matchedOrders => {
-              //println(matchedOrders)
-              var remainingQuantity = order.quantity.value
-              matchedOrders.toList.foreach(matchedOrder => {
-                if (remainingQuantity > 0) {
-                  val matchedQuantity = if ((remainingQuantity - matchedOrder.quantity.value) <= 0)
-                    remainingQuantity
-                  else
-                    matchedOrder.quantity.value
-                  val updatedMatchedOrder = matchedOrder.copy(quantity = Quantity(matchedOrder.quantity.value - matchedQuantity, matchedOrder.quantity.units))
-                  if (updatedMatchedOrder.quantity.value > 0)
-                    offerBook.updateOrder(updatedMatchedOrder)
-                  else
-                    offerBook.deleteOrder(updatedMatchedOrder)
+      }
+      case MarketOrder => {
+        if (book.sortedOrders.size <= 0) throw new Exception("Market order with no defined price currently unsupported")
+        val priceQuantities = book.sortedOrders.map(p => p._1.value -> p._2.map(_.quantity.value).sum)
 
-                  val tcode = TradeCode("dummy-tradecode") // todo
-                  val trade = Trade(tcode, order, Quantity(matchedQuantity, order.quantity.units), order.price, order.counterparty, matchedOrder.counterparty)
-                  tradeLog.addTrade(trade)
-                  remainingQuantity -= matchedQuantity
-                }
-              })
-              order.copy(quantity = order.quantity.copy(value = remainingQuantity))
-            }
+        def getPrice(qty : Double, bestPrice : Double, priceQtys : Map[Double, Double]) : Double = {
+          if (priceQtys.size <= 0 || qty <= priceQtys.head._2) bestPrice
+          else {
+            getPrice(qty - priceQtys.values.head, priceQtys.keys.head, priceQtys.tail)
           }
-          */
-          /*
-          offerBook.sortedOrders.keys.filter(_.value <= order.price.value) match {
-            case Nil => order
-            case matchedOrders => {
-              //println(matchedOrders)
-              var remainingQuantity = order.quantity.value
-              matchedOrders.toList.foreach(orderPriceMatch => {
-                offerBook.sortedOrders(orderPriceMatch).toList.foreach(matchedOrder => {
-                  if (remainingQuantity > 0) {
-                    val matchedQuantity = if ((remainingQuantity - matchedOrder.quantity.value) <= 0)
-                      remainingQuantity
-                    else
-                      matchedOrder.quantity.value
-                    val updatedMatchedOrder = matchedOrder.copy(quantity = Quantity(matchedOrder.quantity.value - matchedQuantity, matchedOrder.quantity.units))
-                    if (updatedMatchedOrder.quantity.value > 0)
-                      offerBook.updateOrder(updatedMatchedOrder)
-                    else
-                      offerBook.deleteOrder(updatedMatchedOrder)
-
-                    val tcode = TradeCode("dummy-tradecode") // todo
-                    val trade = Trade(tcode, order, Quantity(matchedQuantity, order.quantity.units), order.price, order.counterparty, matchedOrder.counterparty)
-                    tradeLog.addTrade(trade)
-                    remainingQuantity -= matchedQuantity
-                  }
-                })
-              })
-              order.copy(quantity = order.quantity.copy(value = remainingQuantity))
-            }
-          }  */
         }
-        case MarketOrder => {
-          if (book.sortedOrders.size <= 0) throw new Exception("Market order with no defined price currently unsupported")
-          val priceQuantities = book.sortedOrders.map(p => p._1.value -> p._2.map(_.quantity.value).sum)
-
-          def getPrice(qty : Double, bestPrice : Double, priceQtys : Map[Double, Double]) : Double = {
-            if (priceQtys.size <= 0 || qty <= priceQtys.head._2) bestPrice
-            else {
-              getPrice(qty - priceQtys.values.head, priceQtys.keys.head, priceQtys.tail)
-            }
-          }
-          val  pricePoint = getPrice(order.quantity.value, 0, priceQuantities)
-          limitOrder(book, order.copy(price = order.price.copy(value = pricePoint)), book.sortedOrders)
+        val  pricePoint = getPrice(order.quantity.value, 0, priceQuantities)
+        limitOrder(book, order.copy(price = order.price.copy(value = pricePoint)), book.sortedOrders)
+      }
+      case FillOrKillOrder => {
+        val availableQuantity = matchedPriceOrders.values.flatten.map(_.quantity.value).sum
+        if (availableQuantity >= order.quantity.value){
+          limitOrder(book, order, matchedPriceOrders)
         }
-        case FillOrKillOrder => {
-          val availableQuantity = matchedPriceOrders.values.flatten.map(_.quantity.value).sum
-          if (availableQuantity >= order.quantity.value){
-            limitOrder(book, order, matchedPriceOrders)
-          }
-          else
-            order.copy(status = OrderClosed)
-        }
-        case _ => throw new OrderTypeNotSupportedException(order)
+        else
+          order.copy(status = OrderClosed)
+      }
+      case _ => throw new OrderTypeNotSupportedException(order)
     }
   }
 

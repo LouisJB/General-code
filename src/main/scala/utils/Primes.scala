@@ -1,7 +1,7 @@
 package utils
 
 import java.lang.Math._
-//import scala.math._
+//import scala.mathutils._
 
 import utils.Maths._
 
