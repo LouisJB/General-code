@@ -28,7 +28,7 @@ case class BinomialTreeOptionPricing(
     ) : Double = {
 
     val p = Array.tabulate(n+1)(x => 0.0)
-    val q = 0.0
+    val q = 0.0 // dividend rate
     val dT = t / n
     val up = exp(σ * sqrt(dT))
 
@@ -39,12 +39,10 @@ case class BinomialTreeOptionPricing(
     for (i <- (0 to n)) {
       d match {
         case PutOption => {
-          p(i) = x - s * pow(up, 2*i - n)
-          if (p(i) < 0) p(i) = 0
+          p(i) = max(x - s * pow(up, 2*i - n), 0)
         }
         case CallOption => {
-          p(i) = s * pow(up, 2*i - n) - x
-          if (p(i) < 0) p(i) = 0
+          p(i) = max(s * pow(up, 2*i - n) - x, 0)
         }
       }
     }
@@ -58,9 +56,11 @@ case class BinomialTreeOptionPricing(
             d match {
               case PutOption => {
                 val exercise = x - s * pow(up, 2*i - j) // exercise value
-                if (p(i) < exercise) p(i) = exercise
+                p(i) = max(exercise, p(i))
               }
               case CallOption => {
+                val exercise = s * pow(up, 2*i - j) - x // exercise value
+                p(i) = max(exercise, p(i))
               }
             }
           }
@@ -114,29 +114,34 @@ object BinomialTreeOptionPricing extends App {
 
     // references
     // http://www.soarcorp.com/black_scholes_calculator.jsp
+    //
     // undiscounted option price is Call = 6.888
     // discounted option price is Call = 8.056 @ r = 0.07
+    //
+    // http://www.intrepid.com/robertl/option-pricer1/option-pricer.cgi
 
-    val uop = undiscountedOptionPrice(F = s, X = x * exp(-r * t), callPut = Call, T = t, vol = σ)
-    val dop = value(Call, s, x, σ, r, t)
-    println("BS callOptionPrice = " + uop)
+    val ucop = undiscountedOptionPrice(F = s * exp(r * t), X = x, callPut = Call, T = t, vol = σ) * exp (-r * t)
+    println("BS call option price = " + ucop)
 
-    val btop1 = BinomialTreeOptionPricing(10)
-    val p1 = btop1.callOptionPrice(s, x, t, r, σ)
-    println("BOPM callOptionPrice = " + p1)
+    val upop = simpleDiscountedOptionPrice(F = s, X = x, callPut = Put, T = t, vol = σ, R = r)
+    println("BS put option price = " + upop)
 
-    val btop2 = BinomialTreeOptionPricing(1000)
-    val ceop = btop2.optionPrice(CallOption, EuropeanOption, s, x, t, r, σ)
-    println("call european option price = " + ceop)
+    val btop = BinomialTreeOptionPricing(1000)
+    val ceop = btop.optionPrice(CallOption, EuropeanOption, s, x, t, r, σ)
+    println("BOPM call european option price = " + ceop)
 
-    val caop = btop2.optionPrice(CallOption, AmericanOption, s, x, t, r, σ)
-    println("call american option price = " + caop)
+    val caop = btop.optionPrice(CallOption, AmericanOption, s, x, t, r, σ)
+    println("BOPM call american option price = " + caop)
 
-    val peop = btop2.optionPrice(PutOption, EuropeanOption, s, x, t, r, σ)
-    println("put european option price = " + peop)
+    val peop = btop.optionPrice(PutOption, EuropeanOption, s, x, t, r, σ)
+    println("BOPM put european option price = " + peop)
 
-    val paop = btop2.optionPrice(PutOption, AmericanOption, s, x, t, r, σ)
-    println("put american option price = " + paop)
+    val paop = btop.optionPrice(PutOption, AmericanOption, s, x, t, r, σ)
+    println("BOPM put american option price = " + paop)
+
+    val btop2 = BinomialTreeOptionPricing(10)
+    val p1 = btop2.callOptionPrice(s, x, t, r, σ)
+    println("BOPM call option price = " + p1)
   }
 
   // example taken from Hull (8.0th ed, p254), 1 step binomial
@@ -145,7 +150,7 @@ object BinomialTreeOptionPricing extends App {
     val x = 21.0
     val t = 0.25
     val r = 0.12
-    val σ = .2 // stdDev(18.0 :: 22.0 :: Nil) / s
+    val σ = 0.2 // stdDev(18.0 :: 22.0 :: Nil) / s
     println("\nRunning s2 with: " + formatParams(s, x, t, r, σ))
 
     import BlackScholes._

@@ -91,12 +91,19 @@ class BlackScholes(F : Double, X : Double, callPut : CallOrPut, T : Double, σ :
 }
 
 object BlackScholes {
+
   def undiscountedOptionPrice(F : Double, X : Double, callPut : CallOrPut, T : Double, vol : Double) : Double = {
     val bl = new BlackScholes(F, X, callPut, T, vol)
     bl.undiscountedOptionPrice
   }
+
   def value(callOrPut: CallOrPut, F: Double, K: Double, sigma: Double, r: Double, T: Double) = {
     undiscountedOptionPrice(F, K, callOrPut, T, sigma) * exp(-r * T)
   }
+  
+  def simpleDiscountedOptionPrice(F : Double, X : Double, callPut : CallOrPut, T : Double, vol : Double, R: Double) = {
+    value(callPut, F * exp(R * T), X, vol, R, T)
+  }
+  
   override def toString = "Black Scholes"
 }
