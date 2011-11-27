@@ -1,4 +1,5 @@
 package projecteuler
+
 import math._
 
 trait PokerHand {
@@ -94,7 +95,6 @@ case class Hand(cards : List[Card]) {
       if (values.exists(_._2.size == 2))
         FullHouse(cards)
       else {
-        val x = values.filter(_._2.size == 4)
         FourOfAKind(cards)
       }
     }
@@ -213,21 +213,16 @@ object Problem54 {
     val testWinCount = testWins.filter(_._5 == true)
     //testWins.foreach(println)
     println("no of test wins = " + testWinCount.size + " out of " + testWins.size)
-    
-    val allHandsLines = scala.io.Source.fromFile("/Users/chillipower_uk/dev/projects/testprojects/training/Training-Scala/resources/euler/problem54-poker.txt")
 
+    // actual data
+    val allHandsLines = scala.io.Source.fromFile("/Users/chillipower_uk/dev/projects/testprojects/training/Training-Scala/resources/euler/problem54-poker.txt")
     val allHands = allHandsLines.getLines().map(h => h.split(" ").splitAt(5))
-    
-    val wins = allHands.map(h => 
+    val wins = allHands.map(h =>
       (h._1.toList, h._2.toList, winningHand(Hand.apply2(h._1.toList).bestHand, Hand.apply2(h._2.toList).bestHand))).toList
     
     val winCount = wins.filter(_._3 == true).size
-
-    println()
     //wins.foreach(println)
     println("no of wins = " + winCount + " out of " + wins.size)
-
-    // 383, 379 wrong
     assert(winCount == 376)
   }
 }
