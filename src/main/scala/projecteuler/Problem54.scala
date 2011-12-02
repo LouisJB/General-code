@@ -79,11 +79,11 @@ case class Hand(cards : List[Card]) {
   def bestHand : PokerHand = {
     val suits = cards.groupBy(_.suit)
     val values = cards.groupBy(_.value)
-    val sortedValues = cards.sortWith(_.value.n > _.value.n)
+    val sortedValues = cards.sortWith(_.value() > _.value())
     
     if (suits.size == 1) {
-      val minValue = sortedValues.last.value.n
-      val maxValue = sortedValues.head.value.n
+      val minValue = sortedValues.last.value()
+      val maxValue = sortedValues.head.value()
       if ((minValue == TEN.n) && (maxValue == ACE.n))
         RoyalFlush(cards)
       else if ((maxValue - minValue) == 4)

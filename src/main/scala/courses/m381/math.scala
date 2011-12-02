@@ -27,10 +27,38 @@ object M381 {
 
   // euler totient (phi(n)) function, number of numbers less than n that are co-prime to n
   def totient(n : Int) = (0 until n).filter(x => gcd(x, n) == 1).size
-  
+
   def tau(n : Int) = (1 to n).filter(x => (n % x) == 0).size
   def sigma(n : Int) = (1 to n).filter(x => (n % x) == 0).sum
-  def phi(n : Int) = (1 to n).filter(a => gcd(a, n) == 1).size
+  def phi(n : Int) = (1 until n).filter(a => gcd(a, n) == 1).size // euler phi φ
+
+  val phiM = Memoize1(phi)
+  def intPow(n : Int, m : Int) = { var s = 1; (1 to m).foreach(_ => s = (s * n)); s }
+  def fastPhi(n : Int) = {
+    val pds = Primes.primeFactorPowers(n)
+    pds.map(p => pow(p._1, p._2 - 1).toInt * (p._1 - 1)).product // phi(p^k) = (p^(k - 1))(p - 1)
+  }
+
+  class Memoize1[-T, +R](f: T => R) extends (T => R) {
+    import scala.collection.mutable
+    private[this] val vals = mutable.Map.empty[T, R]
+
+    def apply(x: T): R = {
+      if (vals.contains(x)) {
+        vals(x)
+      }
+      else {
+        val y = f(x)
+        vals + ((x, y))
+        y
+      }
+    }
+  }
+
+  object Memoize1 {
+    def apply[T, R](f: T => R) = new Memoize1(f)
+  }
+
   def isAbundant(n : Int) = sigma(n) > 2*n
   def isPerfect(n : Int) = sigma(n) == 2*n
   def isDeficient(n : Int) = sigma(n) < 2*n
@@ -286,14 +314,18 @@ object M381 {
 }
 
 object BasicStats {
+  type Num[T] = Numeric[T]
   import Numeric.Implicits._
+  def sqr[T : Numeric](x : T) = x * x
   def average[T : Numeric](ls : List[T]) : Double = ls.sum.toDouble / ls.size.toDouble
   def standardDeviation[T : Numeric](ls : List[T]) : Double = pow(ls.map(x => pow((x.toDouble - average(ls)), 2)).sum / ls.size, 0.5)
-  def variance[T : Numeric](ls : List[T]) = ls.map(x => pow((x.toDouble-average(ls)), 2)).sum/ls.size
+  def σ[T : Num](ls : List[T]) = standardDeviation(ls)
+  def variance[T : Numeric](ls : List[T]) = { val av = average(ls); ls.map(x => sqr(x.toDouble-av)).sum/ls.size }
+  // alternate formulation
+  def varianceAlt[T : Numeric](ls : List[T]) = (ls.map(sqr(_)).sum.toDouble / ls.size) - (sqr(ls.sum).toDouble / sqr(ls.size))
+
   def stats(ls : List[Double]) = "size %d min %f max %f mean %f variance %f standard deviation %f".format(ls.size, ls.min, ls.max, average(ls), variance(ls), standardDeviation(ls))
-
   def filter(ls : List[Double], sd : Double) = { val a = average(ls); ls.filter(x => pow(x-a, 2.0) <= sd) }
-
   def distrib(s : Double, e : Double, d : Double, ls : List[Double]) = (s to e by d).map(r => (r, ls.filter(x => x >= r && x < r + d).size.toDouble/((e-s)/d)))
 }
 
