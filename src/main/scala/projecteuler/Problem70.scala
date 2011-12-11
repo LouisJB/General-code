@@ -38,7 +38,7 @@ object Problem70 {
     // answer is 8319823
     println("ans r = " + r)
 
-    assert(r == 8319823)
+    assert(r._1 == 8319823)
     return;
 
 
