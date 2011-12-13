@@ -10,19 +10,36 @@ trait RandomScalar {
   def nextValue : Double
 }
 
+object RandomScalar {
+  def NULL = new Object with RandomScalar {
+    def nextValue = 0.0
+  }
+}
+
 // a random process that creates new versions of itself from one time step to the next
 trait RandomVariable[T] {
   def nextValue : T
 }
 
+trait MarkovStochasticProcess extends RandomVariable[MarkovStochasticProcess] {
+  val value : Double
+  val mean : Double
+  val sd : Double
+  val stepSize : Double
+  val timeStep : Double
+  val nrs : RandomScalar
+
+  def nextValue : MarkovStochasticProcess
+}
+
 // general (Normal) random process with mean and std dev
-case class MarkovStochasticProcess(
+case class MarkovStochasticProcessImpl(
   value : Double,
   mean : Double,
   sd : Double,
   stepSize : Double,
   timeStep : Double,
-  nrs : RandomScalar) extends RandomVariable[MarkovStochasticProcess] {
+  nrs : RandomScalar) extends MarkovStochasticProcess { //RandomVariable[MarkovStochasticProcessImpl] {
 
   val sdStep = sd * sqrt(stepSize)
 
@@ -34,6 +51,17 @@ case class MarkovStochasticProcess(
 
     copy(value = v, timeStep = t)
   }
+}
+
+case object NullMarkovStochasticProcess extends MarkovStochasticProcess {
+  val value = 0.0
+  val mean = 0.0
+  val sd = 0.0
+  val stepSize = 0.0
+  val timeStep = 0.0
+  val nrs = RandomScalar.NULL
+  
+  def nextValue = this
 }
 
 object MarkovStochasticProcess {
@@ -56,8 +84,10 @@ object MarkovStochasticProcess {
         def nextValue = r2.nextGaussian() // * sd + mean
       }
     
-      MarkovStochasticProcess(value, mean, sd, stepSize, timeStep, n1)
+    MarkovStochasticProcessImpl(value, mean, sd, stepSize, timeStep, n1)
   }
+  
+  def NULL = NullMarkovStochasticProcess
 
   def main(args : Array[String]) {
     val r1 = MarkovStochasticProcess(0.0, 0.0, 1.0, 0.1)
@@ -143,9 +173,8 @@ case class ItoRandomVariable(
   def nextValue : ItoRandomVariable = {
     val nextWp = wp.nextValue
     val v = value + meanFn(value, stepSize) + nextWp.value * sdFn(value, stepSize)
-      copy(
-        value = v, timeStep = nextWp.timeStep, wp = nextWp)
-    }
+    copy(value = v, timeStep = nextWp.timeStep, wp = nextWp)
+  }
 }
 
 case class ItoStockPriceModelRandomVariable2(
@@ -158,8 +187,7 @@ case class ItoStockPriceModelRandomVariable2(
 
   def nextValue = {
     val m = model.nextValue
-    copy(
-      value = m.value, timeStep = m.timeStep, model = m)
+    copy(value = m.value, timeStep = m.timeStep, model = m)
   }
 }
 
@@ -194,8 +222,7 @@ case class ItoStockPriceModelRandomVariable(
   def nextValue = {
     val nextWp = wp.nextValue
     val v = value + (mean * stepSize * value) + (nextWp.value * sdStep * value)
-    copy(
-      value = v, timeStep = nextWp.timeStep, wp = nextWp)
+    copy(value = v, timeStep = nextWp.timeStep, wp = nextWp)
   }
 }
 
@@ -241,15 +268,11 @@ object RandomVariableTest {
   
   def series3 = {
     // mock Wiener process, random sample e as per example from Hull r8 p289
-    case class WPM(value : Double,  stepSize : Double,  timeStep : Double, var pos : Int = 0)
-        extends WienerProcess {
-      val msp : MarkovStochasticProcess = null // not used
+    case class WPM(value : Double,  stepSize : Double,  timeStep : Double, pos : Int = 0) extends WienerProcess {
+      val msp : MarkovStochasticProcess = MarkovStochasticProcess.NULL
       val ls = List(0.52, 1.44, -0.86, 1.46, -.69, -0.74, 0.21, -1.10, 0.73, 1.16, 2.56)
-      override def nextValue : WienerProcess = {
-        val v = ls(pos)
-        pos = pos + 1
-        copy(value = v, timeStep = pos * stepSize)
-      }
+      override def nextValue : WPM =
+        copy(value = ls(pos), pos = pos + 1, timeStep = pos * stepSize)
     }
     
     val mockedWp1 = WPM(0.0, 1.0/52, 0.0)
@@ -260,11 +283,13 @@ object RandomVariableTest {
 
     series1.foreach(println)
 
-    println("--")
+    println()
+    val value1 = (1 to 10).foldLeft(mockedWp1)((a : WPM, b : Int) => a.nextValue)
+    println("mockedWp1 = " + mockedWp1 + ", value1 = " + value1)
 
-    val mockedWp2 = WPM(0.0, 1.0/52, 0.0)
+    println("--")
     
-    val r2 = ItoStockPriceModelRandomVariable2(100.0, 0.15, 0.3, 1.0 / 52, 0.0, mockedWp2)
+    val r2 = ItoStockPriceModelRandomVariable2(100.0, 0.15, 0.3, 1.0 / 52, 0.0, mockedWp1)
     val series2 = (1 to 10).foldLeft(List(r2))(
       (ls : List[ItoStockPriceModelRandomVariable2], b : Int) => ls.head.nextValue :: ls).reverse
 
