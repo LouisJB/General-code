@@ -3,25 +3,48 @@ package randomvariables
 import math._
 import cern.jet.random.Normal
 import cern.jet.random.engine.MersenneTwister
-import java.lang.Object
+
+// some time discrete variable that may or may not be random (i.e. could be be a function of time)
+trait DiscreteVariable {
+  val value : Double
+  val stepSize : Double
+  val timeStep : Double
+}
+
+trait NullDiscreteVariable {
+  val value = 0.0
+  val stepSize = 0.0
+  val timeStep = 0.0
+}
 
 // abstract random variable who's exact distribution is provided by implementation
 trait RandomScalar {
   def nextValue : Double
 }
 
-object RandomScalar {
-  def NULL = new Object with RandomScalar {
-    def nextValue = 0.0
-  }
+trait NullRandomScalar extends RandomScalar {
+  def nextValue = 0.0
 }
+
+object RandomScalar {
+  def NULL = new Object with  NullRandomScalar
+}
+
+trait DiscreteRandomScalar extends RandomScalar with DiscreteVariable
 
 // a random process that creates new versions of itself from one time step to the next
 trait RandomVariable[T] {
   def nextValue : T
 }
 
-trait MarkovStochasticProcess extends RandomVariable[MarkovStochasticProcess] {
+trait DiscreteRandomVariable[T] extends RandomVariable[T] with DiscreteVariable
+
+trait NullDiscreteRandomVariable[T] extends RandomVariable[T] with DiscreteVariable {
+
+}
+
+
+trait MarkovStochasticProcess extends DiscreteRandomVariable[MarkovStochasticProcess] {
   val value : Double
   val mean : Double
   val sd : Double
@@ -29,39 +52,31 @@ trait MarkovStochasticProcess extends RandomVariable[MarkovStochasticProcess] {
   val timeStep : Double
   val nrs : RandomScalar
 
+  val sdStep = sd * sqrt(stepSize)
   def nextValue : MarkovStochasticProcess
 }
 
-// general (Normal) random process with mean and std dev
+// general (Normal N(m, s)) random process with mean and std dev
 case class MarkovStochasticProcessImpl(
   value : Double,
   mean : Double,
   sd : Double,
   stepSize : Double,
   timeStep : Double,
-  nrs : RandomScalar) extends MarkovStochasticProcess { //RandomVariable[MarkovStochasticProcessImpl] {
-
-  val sdStep = sd * sqrt(stepSize)
+  nrs : RandomScalar) extends MarkovStochasticProcess {
 
   def nextValue = {
     val t = timeStep + stepSize
-    val movement = nrs.nextValue * sdStep + mean
-    //println("movement = " + movement)
-    val v = value + movement
-
+    val v = value + nrs.nextValue * sdStep + mean
     copy(value = v, timeStep = t)
   }
 }
 
-case object NullMarkovStochasticProcess extends MarkovStochasticProcess {
-  val value = 0.0
+case object NullMarkovStochasticProcess extends MarkovStochasticProcess with NullDiscreteVariable {
   val mean = 0.0
   val sd = 0.0
-  val stepSize = 0.0
-  val timeStep = 0.0
   val nrs = RandomScalar.NULL
-  
-  def nextValue = this
+  val nextValue = this
 }
 
 object MarkovStochasticProcess {
@@ -71,6 +86,8 @@ object MarkovStochasticProcess {
     sd : Double,
     stepSize : Double,
     timeStep : Double = 0.0) : MarkovStochasticProcess = {
+
+      // create the underlying Random variable, in this case a normally distributed N(0, 1) source
 
       // using Colt Normal distribution
       val r1 = new Normal(0.0, 1.0, /* mean, sd, */ new MersenneTwister(System.currentTimeMillis().toInt))
@@ -120,9 +137,17 @@ case class WienerProcessImpl(
 
   def nextValue : WienerProcess = {
     val v = msp.nextValue
-    copy(
-      value = v.value, timeStep = v.timeStep, msp = v)
+    copy(value = v.value, timeStep = v.timeStep, msp = v)
   }
+}
+
+case object NullWienerProcess extends WienerProcess {
+  val value = 0.0
+  val stepSize = 0.0
+  val timeStep = 0.0
+  val msp = NullMarkovStochasticProcess
+
+  def nextValue : WienerProcess = this
 }
 
 object WienerProcess {
@@ -134,6 +159,8 @@ object WienerProcess {
     val msp = MarkovStochasticProcess(value, 0.0, 1.0, stepSize, timeStep)
     WienerProcessImpl(value, stepSize, timeStep, msp)
   }
+
+  def NULL = NullWienerProcess
 
   def main(args : Array[String]) {
     val r1 = WienerProcess(0.0, 0.1)
@@ -157,8 +184,14 @@ case class GeneralisedWienerRandomVariable(
         sd : Double,
         stepSize : Double,
         timeStep : Double,
-        wp : WienerProcess) {
-  // todo
+        wp : WienerProcess) extends DiscreteRandomVariable[GeneralisedWienerRandomVariable] {
+
+  val sdStep = sd * sqrt(stepSize)
+  def nextValue : GeneralisedWienerRandomVariable = {
+    val nextWp = wp.nextValue
+    val v = value + mean + nextWp.value * sdStep
+    copy(value = v, timeStep = nextWp.timeStep, wp = nextWp)
+  }
 }
 
 // Random variable that follows an Ito process using functions of x and t for mean and standard-dev
@@ -168,43 +201,12 @@ case class ItoRandomVariable(
         sdFn : (Double, Double) => Double,
         stepSize : Double,
         timeStep : Double,
-        wp : WienerProcess) {
+        wp : WienerProcess) extends DiscreteRandomVariable[ItoRandomVariable] {
 
   def nextValue : ItoRandomVariable = {
     val nextWp = wp.nextValue
     val v = value + meanFn(value, stepSize) + nextWp.value * sdFn(value, stepSize)
     copy(value = v, timeStep = nextWp.timeStep, wp = nextWp)
-  }
-}
-
-case class ItoStockPriceModelRandomVariable2(
-        value : Double,
-        mean : Double,
-        sd : Double,
-        stepSize : Double,
-        timeStep : Double,
-        model : ItoRandomVariable) extends RandomVariable[ItoStockPriceModelRandomVariable2] {
-
-  def nextValue = {
-    val m = model.nextValue
-    copy(value = m.value, timeStep = m.timeStep, model = m)
-  }
-}
-
-object ItoStockPriceModelRandomVariable2 {
-  def apply(
-    value : Double,
-    mean : Double,
-    sd : Double,
-    stepSize : Double,
-    timeStep : Double,
-    wp : WienerProcess = null) : ItoStockPriceModelRandomVariable2 = {
-
-    val w = Option(wp).getOrElse(WienerProcess(0.0, stepSize, timeStep))
-    val meanFn = (v : Double,  t : Double) => mean * v * t
-    val sdFn = (v : Double,  t : Double) => v * sqrt(stepSize) * sd
-    val model = ItoRandomVariable(value, meanFn, sdFn, stepSize, timeStep, w)
-    ItoStockPriceModelRandomVariable2(value, mean, sd, stepSize, timeStep, model)
   }
 }
 
@@ -215,7 +217,7 @@ case class ItoStockPriceModelRandomVariable(
         sd : Double,
         stepSize : Double,
         timeStep : Double,
-        wp : WienerProcess) extends RandomVariable[ItoStockPriceModelRandomVariable] {
+        wp : WienerProcess) extends DiscreteRandomVariable[ItoStockPriceModelRandomVariable] {
 
   val sdStep = sd * sqrt(stepSize)
 
@@ -236,6 +238,40 @@ object ItoStockPriceModelRandomVariable {
 
     val wp = WienerProcess(0.0, stepSize, timeStep)
     ItoStockPriceModelRandomVariable(value, mean, sd, stepSize, timeStep, wp)
+  }
+}
+
+case class ItoStockPriceModelRandomVariable2(
+        value : Double,
+        mean : Double,
+        sd : Double,
+        stepSize : Double,
+        timeStep : Double,
+        model : ItoRandomVariable) extends DiscreteRandomVariable[ItoStockPriceModelRandomVariable2] {
+
+  def nextValue = {
+    val m = model.nextValue
+    copy(value = m.value, timeStep = m.timeStep, model = m)
+  }
+}
+
+object ItoStockPriceModelRandomVariable2 {
+  def apply(
+    value : Double,
+    mean : Double,
+    sd : Double,
+    stepSize : Double,
+    timeStep : Double,
+    wp : WienerProcess = WienerProcess.NULL) : ItoStockPriceModelRandomVariable2 = {
+
+    val w = wp match {
+      case NullWienerProcess => WienerProcess(0.0, stepSize, timeStep)
+      case _ => wp
+    }
+    val meanFn = (v : Double,  t : Double) => mean * v * t
+    val sdFn = (v : Double,  t : Double) => v * sqrt(stepSize) * sd
+    val model = ItoRandomVariable(value, meanFn, sdFn, stepSize, timeStep, w)
+    ItoStockPriceModelRandomVariable2(value, mean, sd, stepSize, timeStep, model)
   }
 }
 
