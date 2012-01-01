@@ -1,4 +1,4 @@
-package problems
+package projecteuler
 
 import math._
 

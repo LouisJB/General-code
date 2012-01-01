@@ -9,8 +9,8 @@ object ProjectSettings extends Build{
   val scalaSwing = "org.scala-lang" % "scala-swing" % "2.9.1"
   val scalaTest = "org.scalatest" % "scalatest" % "1.4.RC2" % "test"  
   val scalacheck = "org.scala-tools.testing" % "scalacheck_2.9.1.RC3" % "1.9" // % "test" 
-  val scalaZ = "org.scalaz" % "scalaz-full_2.9.1" % "6.0.3"
-  val colt = "colt" %  "colt" % "1.2.0"
+  val scalaZ = "org.scalaz" % "scalaz-full_2.9.1" % "6.0.3" withSources()
+  val colt = "colt" %  "colt" % "1.2.0" // withSources()
   val apacheMath = "org.apache.commons" % "commons-math" % "2.0"
 
   val dependencies = Seq(scalaTest, scalacheck, scalaSwing, scalaZ, colt, apacheMath)

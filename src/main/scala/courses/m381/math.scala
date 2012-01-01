@@ -154,7 +154,22 @@ object M381 {
   def cf(ls : List[Double]) : Double = ls match { case Nil => 0; case h :: t => h + 1/cf(t) }
   def fcf(a : Int, b : Int) : List[Int] = if (b == 0) Nil else (a/b) :: fcf(b, a % b)
   def fcf2(a : Int, b : Int) : FCF = if (b == 0) FCF(Nil) else FCF((a/b) :: fcf2(b, a % b).ls)
-  
+
+  // continued fraction of a ratio, basically Euclidean GCD
+  def cf(a : Int, b : Int,  n : Int = 100) : List[Int] =
+    if (n == 0 || b == 0) Nil
+    else {
+      val x = a / b // integer quotient
+      x :: cf(b, a - x*b, n - 1)
+    }
+
+  // continued fraction of a decimal fraction
+  def cf(x : BigDecimal, n : Int) : List[Int] =
+    if (x > 1E9 || n == 0) Nil
+    else {
+      val f = x.toInt
+      f :: cf(BigDecimal(1) / (x - f), n - 1)
+    }
 
   // rational class
   case class R(n : Int, d : Int) {
