@@ -5,16 +5,13 @@ import scala.swing.Reactor
 
 import javax.swing.JFrame
 import java.awt.Graphics
-import java.awt.Color
 import java.awt.Point
-
 
 class SierpinskiTriangleApplet extends Applet {
 
   object ui extends UI with Reactor {
 
-    def init() = {
-    }
+    def init() = {}
 
     override def start() = {
       this.repaint()
@@ -26,7 +23,6 @@ class SierpinskiTriangleApplet extends Applet {
     val p1 = new Point((b.x + b.width) / 2, b.y)
     val p2 = new Point(0, b.y + b.height)
     val p3 = new Point(b.x + b.width , b.y + b.height)
-    //draw(g, p1, p2, p3)
 
     drawSierpinski(g, p1, p2, p3)
   }
@@ -66,7 +62,7 @@ class SierpinskiTriangleApplet extends Applet {
             (p3.y + p2.y) / 2 + (p3.y - p1.y) / 2), //y coordinate of second corner
             new Point((p3.x + p2.x) / 2, //x coordinate of third corner
             (p3.y + p2.y) / 2)  //y coordinate of third corner
-        );
+        )
     }
   }
 }
