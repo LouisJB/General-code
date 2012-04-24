@@ -6,7 +6,7 @@ object Probability extends App {
   import math._
   type ~>[T, R] = PartialFunction[T, R]
 
-  // utils/pimps
+  // simple utils/pimps
   case class RichInt(n : Int) {
     def ! = fact(n)
     def pow(p : Int) : Int = n match {
@@ -113,7 +113,50 @@ object Probability extends App {
   
   println("Poisson X ~ Poisson(1.8) P(X = 4) = " + poisson(1.8)(4))
   println("Poisson Y ~ Poisson(4), P(X>=3) = " + poissonZgteK(4)(3))
+
+
+  /**
+   * Uniform distribution
+   */
+  def uniformPdf(a : Double, b : Double) : ~>[Double, Double] = {
+    case x if a <= x && x <= b => 1.0 / (b - a)
+  }
   
+  /**
+   * exponential X ∼ M(λ), f(x) = λe^(−λx), x >= 0
+   * 
+   */
+  def exponentialPdf(λ : Double) : ~>[Double, Double] = {
+    case x if x >= 0 => λ * exp(-1.0 * λ * x)
+  }
+
+  def exponentialCdf(λ : Double)(x : Double) = 1.0 - exp(-1.0 * λ * x)
+ 
+  def meanExponential(λ : Double) = 1.0 / λ
+  def varienceExponential(λ : Double) = 1.0 / (λ*λ)
+  
+  def centralLimitMean(μ : Double)(σ : Double)(n : Int) = Npdf(μ)(σ*σ/n)
+
+
+  /**
+   * Gamma Y ∼ Γ(n, λ),
+   */
+  def Γpdf(n : Int)(λ : Double) : ~>[Double, Double] = {
+    case y if y >= 0 => (pow(y, n-1) * pow (λ, n) * exp(-1.0 * λ * y)) / ((n-1)!)
+  }
+
+  /**
+   * Normal X ∼ N(μ, σ^2), f(x) ; x ∈ R
+   */
+  def Npdf(μ : Double)(σ : Double) : ~>[Double, Double] = {
+    case x => 1.0 / (σ * sqrt(2.0 * Pi)) * exp(-(pow(x - μ, 2.0) / (2.0 * σ * σ)))
+  }
+
+  def NStdPdf : ~>[Double, Double] = {
+    case x => 1.0 / (sqrt(2.0 * Pi)) * exp(-(pow(x, 2.0) / 2.0))
+  }
+
+  // some probability functions
   def notP(p : Double) = 1.0 - p
   def aIntersectB(pA : Double,  pB : Double,  pAUnionB : Double) = pA + pB - pAUnionB
   def conditionalAGivenE(pAUnionE : Double,  pE : Double) = pAUnionE / pE
