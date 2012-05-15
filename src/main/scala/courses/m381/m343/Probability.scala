@@ -1,6 +1,7 @@
 package courses.m381.m343
 
-import scala.PartialFunction
+import scala.{Int, PartialFunction}
+import math._
 
 object Probability extends App {
   import math._
@@ -96,23 +97,30 @@ object Probability extends App {
   }
 
   /**
-   * Poisson(u) distributions
-   * mean = u
+   * Poisson(μ) distributions
+   * mean μ = λ
    * B(n, p) ~= Poission(np) for large n and small p
    */
-  def poisson(u : Double) : ~>[Int, Double] = {
-    case z if z >= 0 => ((E pow (-1.0 * u)) * (u pow z)) / (z!)
+  def poisson(μ : Double) : ~>[Int, Double] = {
+    case z if z >= 0 => ((E pow (-1.0 * μ)) * (μ pow z)) / (z!)
   }
-  
-  def poissonZltK(u : Double) : ~>[Int, Double] = {
-    case k if k >= 0 => (0 until k).map(poisson(u)).sum 
+
+  // cdf (P(X <= x)
+  def poissonCdf(μ : Double) : ~>[Int, Double] = {
+    case k if k >= 0 =>
+      ((E pow (-1.0 * μ)) * (0 to k).map(i => ((μ pow i) / (i!))).sum) //(0 until k).map(poisson(u)).sum
   }
-  def poissonZgteK(u : Double) : ~>[Int, Double] = {
-    case k if k >= 0 => 1 - poissonZltK(u)(k) 
+  // 1 - cdf
+  def poissonInvCdf(μ : Double) : ~>[Int, Double] = {
+    case k if k >= 0 => 1 - poissonCdf(μ)(k)
   }
-  
+
+  def cdfPoisonIntegralTransform(μ : Double) : ~>[Double, Int] = {
+    case u if ((u >= 0.0) && (u <= 1.0)) => ((0 to 1000000).find(x => poissonCdf(μ)(x) > u)).get
+  }
+
   println("Poisson X ~ Poisson(1.8) P(X = 4) = " + poisson(1.8)(4))
-  println("Poisson Y ~ Poisson(4), P(X>=3) = " + poissonZgteK(4)(3))
+  println("Poisson Y ~ Poisson(4), P(X>=3) = " + poissonInvCdf(4)(3))
 
 
   /**
@@ -163,6 +171,63 @@ object Probability extends App {
   def bayesPAGivenB(pA : Double,  pB : Double, pBGivenA : Double) = (pBGivenA * pA) / pB
 }
 
-class Probability {
+object TestProbability {
+  import courses.m381.m343.Probability._
 
+  def main(args : Array[String]) {
+
+    val l = 14
+    val λ = 14
+    val μ = (λ * .5 * .4)
+    println("λ = " + λ + ", " + μ)
+    val p = poisson(μ)
+
+    val f = poissonInvCdf(μ)
+    val x1 = f(2)
+
+    val f2 = poissonCdf(μ)
+    val x2 = 1 - f2(2)
+
+    val x3 = 1 - ((0 to 2).map(p).sum)
+
+    val x4 = 1.0 - ((E pow (-1.0 * μ)) * (0 to 2).map(i => ((μ pow i) / (i!))).sum)
+
+    println("x1 = " + x1 + ", x2 = " + x2 + ", x3 = " + x3 + ", x4 = " + x4)
+
+    (0 to 10).map(x => (x, p(x), f2(x))).foreach(println)
+
+    val invUP = cdfPoisonIntegralTransform(μ)
+    val n = invUP(0.3872)
+    println("n = " + n)
+
+
+    val size = cdfPoisonIntegralTransform(μ)(0.25727)
+    println("size = " + size)
+    val us = List((0.64334, 0.08691), (0.18912, 0.59396))
+    val positions = scalePositions(0.5, 0.4)(us)
+    println("positions:\n" + positions.mkString(", "))
+
+
+    val ls = List(6,4,5,6,6, 6,8,6,7,8, 5,9,10,6,8, 4,5,8,9,7)
+    val k = ls.size
+    val M = ls.sum.toDouble
+    val avg = M.toDouble / k
+    val sd = ls.map(x => (x - avg) pow 2).sum
+    val xSqr = ls.map(x => x * x).sum
+    val sd2 = xSqr - ((M pow 2) / k)
+    println("sum = " + M + ", sd = " + sd + ", sd2 = " + sd2)
+    val t = k * sd / ls.sum
+    println("t = " + t)
+  }
+
+  def tryInvTrans = {
+    val invUP = cdfPoisonIntegralTransform(4)
+    val n = invUP(0.1396)
+    println("n = " + n)
+  }
+
+  def scalePositions(a : Double, b : Double)(u : List[(Double, Double)]) : List[(Double, Double)] = {
+    (0 until u.size).map(n => (u(n)._1 * a, u(n)._2 * b)).toList
+  }
 }
+
