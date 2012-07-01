@@ -191,8 +191,10 @@ object SudokuTest extends App {
   import SudokuPuzzle._
   
   def solve(puzzle : SudokuPuzzle) {
+    val startMs = System.currentTimeMillis()
     val s = puzzle.solve
-    println("p " + puzzle.name + " solves in %d as\n%s".format(s._2, s._1))
+    val ms = startMs - System.currentTimeMillis()
+    println("p " + puzzle.name + " solves in %d as\n%s".format(ms, s._1))
   }
 
   solve(SudokuPuzzle("p1",
@@ -362,16 +364,42 @@ object SudokuTest extends App {
       (N, N, 7, N, N, N, N, N, 5),
       (N, N, N, N, N, N, N, 9, 8))
   ))
+
 /*
   solves as:
-  1 2 9 4 5 6 3 8 7
-  3 7 4 2 1 8 9 5 6
-  8 5 6 9 3 7 1 4 2
-  7 1 8 5 9 4 6 2 3
-  2 4 5 6 7 3 8 1 9
-  6 9 3 8 4 2 5 7 1
-  5 6 2 1 8 9 7 3 4
-  9 8 7 3 2 1 4 6 5
-  4 3 1 7 6 5 2 9 8
+1 2 8 4 6 5 3 7 9
+3 7 4 2 1 9 8 5 6
+9 5 6 8 3 7 1 4 2
+7 6 5 1 9 8 4 2 3
+2 4 9 6 7 3 5 8 1
+8 1 3 5 4 2 9 6 7
+5 9 2 3 8 6 7 1 4
+4 8 7 9 2 1 6 3 5
+6 3 1 7 5 4 2 9 8
 */
+
+  // http://www.kristanix.com/sudokuepic/worlds-hardest-sudoku.php
+  solve(("Kristanix worlds hardest", Vector(
+      (1, N, N, N, N, 7, N, 9, N),
+      (N, 3, N, N, 2, N, N, N, 8),
+      (N, N, 9, 6, N, N, 5, N, N),
+      (N, N, 5, 3, N, N, 9, N, N),
+      (N, 1, N, N, 8, N, N, N, 2),
+      (6, N, N, N, N, 4, N, N, N),
+      (3, N, N, N, N, N, N, 1, N),
+      (N, 4, N, N, N, N, N, N, 7),
+      (N, N, 7, N, N, N, 3, N, N))
+      ))
+
+  solve(("Kristanix new 30-06-2012 worlds hardest", Vector(
+    (8, N, N, N, N, N, N, N, N),
+    (N, N, 3, 6, N, N, N, N, N),
+    (N, 7, N, N, 9, N, 2, N, N),
+    (N, 5, N, N, N, 7, N, N, N),
+    (N, N, N, N, 4, 5, 7, N, N),
+    (N, N, N, 1, N, N, N, 3, N),
+    (N, N, 1, N, N, N, N, 6, 8),
+    (N, N, 8, 5, N, N, N, 1, N),
+    (N, 9, N, N, N, N, 4, N, N))
+    ))
 }

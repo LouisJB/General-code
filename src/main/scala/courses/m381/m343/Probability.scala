@@ -2,6 +2,8 @@ package courses.m381.m343
 
 import scala.{Int, PartialFunction}
 import math._
+import cern.jet.random.Normal
+import finance.pricing.RandomVariables
 
 object Probability extends App {
   import math._
@@ -231,3 +233,65 @@ object TestProbability {
   }
 }
 
+
+import finance.pricing.RandomVariables._
+
+case class ObservedValue(
+  time : Double,
+  value : Double
+)
+
+case class OrdinaryBrownianMotion(diffusionCoefficient : Double) {
+  import Probability._
+
+  def variance(t : Double) = diffusionCoefficient * t
+  def stdDev(t : Double) = sqrt(variance(t))
+  def pdf(t : Double) = normal(0, stdDev(t))
+  def cdf(t : Double) : Double => Double = pdf(t).cdf _
+
+  // markov property, cdf of X <= x at T, given a previous observation of X(t2) = x2
+  def pLessThanXatTgivenObservation(t : Double, x : Double, ob : ObservedValue) =
+    (x : Double) => normal(0, sqrt(diffusionCoefficient * (t - ob.time))).cdf(x - ob.value)
+
+  def conditionalDistribution(obs1 : ObservedValue, obs2 : ObservedValue)(t : Double) = {
+    val μc = ((obs1.value * (obs2.time - t)) + (obs2.value * (t - obs1.time))) / (obs2.time - obs1.time)
+    val σ2c = ((obs2.time - t) * (t - obs1.time) * diffusionCoefficient) / (obs2.time - obs1.time)
+    //println("uc = " + uc + " sigma2c = " + sigma2c)
+    normal(μc, sqrt(σ2c))
+  }
+
+  // waiting times for first attained values
+  // Fw(w)
+  def FwCdf(a : Double) =
+    (w : Double) => 2.0 * (1.0 - normal(0.0, sqrt(diffusionCoefficient * w)).cdf(a))
+
+  def fwPdf(a : Double) =
+    (w : Double) => (a / (w * sqrt(2.0 * Pi * w * diffusionCoefficient))) * (exp(-1.0 * (a pow 2)) / (2 * diffusionCoefficient * w))
+}
+
+object WienerProcesses extends App {
+  import MathUtils._
+  val b1 = OrdinaryBrownianMotion(0.3) // var = σ^2 = 0.3 per timeunits^2
+  val p1 = 1 - b1.cdf(30)(5) // position > 5 after 30 time units
+  assertAlmostEqual(p1, 0.048, "BM(σ^2 = 0.3); P(X(30) > 5)")
+
+  // conditional P(X(30) < 5) given that we observed P(X(10) = 3)
+  val p2 = b1.pLessThanXatTgivenObservation(30, 5, ObservedValue(10, 3))(5)
+  assertAlmostEqual(p2, 0.793, "BM(σ^2 = 0.3); P(X(30) < 5 | P(X(10) = 3)")
+
+  val p3 = b1.conditionalDistribution(ObservedValue(0, 0), ObservedValue(30, 9))(10).cdf(0)
+  assertAlmostEqual(p3, 0.017, "P(X(10)<0|X(0)=0 and X(30) = 9")
+
+  val p4 = b1.FwCdf(5)(60)
+  assertAlmostEqual(p4, 0.238, "P(W5 <= 60)")
+
+  val p4 = b1.FwCdf(5)(60)
+  assertAlmostEqual(p4, 0.238, "P(W5 <= 60)")
+}
+
+object MathUtils {
+  def assertAlmostEqual(value : Double, expectedValue : Double, msg : String = "", tol : Double = 1E-2) = {
+    println(msg + " " + value)
+    assert(abs(value - expectedValue) <= tol, "Value %f not equal to expected value %f with given tolerance %f".format(value, expectedValue, tol))
+  }
+}
