@@ -241,13 +241,47 @@ case class ObservedValue(
   value : Double
 )
 
-case class OrdinaryBrownianMotion(diffusionCoefficient : Double) {
+object BrownianMotion {
+  def ordinaryBrownianMotion(dc : Double) = BrownianMotion(dc, 0.0)
+}
+
+trait WienerProcess
+
+// Weiner process, obeys the (_strong_) Markov property
+//   for which the class of random variables called stopping times are defined
+trait DiffusionProcess extends WienerProcess {
+  def pdf(t : Double) : Double => Double
+  def cdf(t : Double) : Double => Double
+}
+trait OrdinaryBrownianMotion extends DiffusionProcess {
+  def diffusionCoefficient : Double
+  def stdDev(t : Double) : Double
+}
+trait DriftBrownianMotion extends OrdinaryBrownianMotion {
+  def μ : Double
+  def mean : Double
+}
+trait LogNormalBrownianMotion extends OrdinaryBrownianMotion
+
+/**
+ * for u ≥ 0, t > 0,
+ * D(u, u + t) ∼ N(μt, σ2t).
+ * For every pair of disjoint time intervals [t1,t2], [t3,t4], the increments D(t1, t2) and D(t3, t4) are independent random variables.
+ * The random function t −→ D(t) is continuous.
+ */
+case class BrownianMotion(
+              diffusionCoefficient : Double,    // σ^2
+              μ : Double = 0.0                  // drift coefficient
+) extends OrdinaryBrownianMotion {
+
   import Probability._
 
+  def mean(t : Double) = μ * t
   def variance(t : Double) = diffusionCoefficient * t
   def stdDev(t : Double) = sqrt(variance(t))
-  def pdf(t : Double) = normal(0, stdDev(t))
-  def cdf(t : Double) : Double => Double = pdf(t).cdf _
+  def distrib( t : Double) = normal(mean(t), stdDev(t))
+  def pdf(t : Double) : Double => Double = distrib(t).pdf _
+  def cdf(t : Double) : Double => Double = distrib(t).cdf _ // - (μ * t))
 
   // markov property, cdf of X <= x at T, given a previous observation of X(t2) = x2
   def pLessThanXatTgivenObservation(t : Double, x : Double, ob : ObservedValue) =
@@ -260,7 +294,7 @@ case class OrdinaryBrownianMotion(diffusionCoefficient : Double) {
     normal(μc, sqrt(σ2c))
   }
 
-  // waiting times for first attained values
+  // Wa - waiting times for first attained values of x >= x (a > 0)
   // Fw(w)
   def FwCdf(a : Double) =
     (w : Double) => 2.0 * (1.0 - normal(0.0, sqrt(diffusionCoefficient * w)).cdf(a))
@@ -271,7 +305,7 @@ case class OrdinaryBrownianMotion(diffusionCoefficient : Double) {
 
 object WienerProcesses extends App {
   import MathUtils._
-  val b1 = OrdinaryBrownianMotion(0.3) // var = σ^2 = 0.3 per timeunits^2
+  val b1 = BrownianMotion(0.3) // var = σ^2 = 0.3 per timeunits^2
   val p1 = 1 - b1.cdf(30)(5) // position > 5 after 30 time units
   assertAlmostEqual(p1, 0.048, "BM(σ^2 = 0.3); P(X(30) > 5)")
 
@@ -285,8 +319,9 @@ object WienerProcesses extends App {
   val p4 = b1.FwCdf(5)(60)
   assertAlmostEqual(p4, 0.238, "P(W5 <= 60)")
 
-  val p4 = b1.FwCdf(5)(60)
-  assertAlmostEqual(p4, 0.238, "P(W5 <= 60)")
+  val b2 = BrownianMotion(6, 2)
+  val p5 = b2.cdf(5)(15) - b2.cdf(5)(-15)
+  assertAlmostEqual(p5, 0.819, "DP(6, 2) P(−15 < D(5) < 15)")
 }
 
 object MathUtils {
