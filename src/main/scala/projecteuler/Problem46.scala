@@ -32,9 +32,9 @@ object Problem46 {
   /* equivalent verbose imperative version
     for (i <- 1 to n) {
 
-      val x = n - 2 * i * i
+      val n = n - 2 * i * i
 
-      if ((x > 1) && (Primes.isPrime(x)))
+      if ((n > 1) && (Primes.isPrime(n)))
         return true
     }
 

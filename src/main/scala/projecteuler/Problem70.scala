@@ -17,7 +17,7 @@ object Problem70 {
       if (ns.size == ms.size) {
         val xs = ns.toArray.sortWith(_ > _).toList
         val ys = ms.toArray.sortWith(_ > _).toList
-        //println("x = " + x + ", ps = " + ps + ", " + xs)
+        //println("n = " + n + ", ps = " + ps + ", " + xs)
         xs == ys
       }
       else false
@@ -57,7 +57,7 @@ object Problem70 {
       if (xs1.size == ps1.size) {
          val ps = ps1.toArray.sortWith(_ > _).toList
          val xs = xs1.toArray.sortWith(_ > _).toList
-         //println("x = " + x + ", ps = " + ps + ", " + xs)
+         //println("n = " + n + ", ps = " + ps + ", " + xs)
          if (xs == ps) ls = (x, p) :: ls
        }
     }
@@ -86,7 +86,7 @@ object Problem70 {
       if (xs1.size == ps1.size) {
         val ps = ps1.toArray.sortWith(_ > _).toList
         val xs = xs1.toArray.sortWith(_ > _).toList
-        //println("x = " + x + ", ps = " + ps + ", " + xs)
+        //println("n = " + n + ", ps = " + ps + ", " + xs)
         if (xs == ps) Some(x, p) else None
       }
       else None
@@ -98,32 +98,32 @@ object Problem70 {
     println("3. took " + (System.currentTimeMillis - start) + "ms")
 
     /*
-      case (x, p) => {
+      case (n, p) => {
         val ps1 : String = p.toString
-        val xs1 : String = x.toString
+        val xs1 : String = n.toString
 
         { case _ if (xs1.size == ps1.size) => {
           val ps = ps1.toArray.sortWith(_ > _).toList
           val xs = xs1.toArray.sortWith(_ > _).toList
-          println("x = " + x + ", ps = " + ps + ", " + xs)
-          (x, p)
+          println("n = " + n + ", ps = " + ps + ", " + xs)
+          (n, p)
         } }
 
         new PartialFunction[Int, (Int, Int)] {
-          val p = fastPhi(x)
+          val p = fastPhi(n)
           val ps1 : String = p.toString
-          val xs1 : String = x.toString
+          val xs1 : String = n.toString
           val (isDefined, value) =
           if (xs1.size != ps1.size) (false, (0, 0))
           else {
             val ps = ps1.toArray.sortWith(_ > _).toList
             val xs = xs1.toArray.sortWith(_ > _).toList
-            println("x = " + x + ", ps = " + ps + ", " + xs)
-            (x, p)
-            ((xs == ps), (x, p))
+            println("n = " + n + ", ps = " + ps + ", " + xs)
+            (n, p)
+            ((xs == ps), (n, p))
           }
-          def isDefinedAt(x : Int) = isDefined
-          def appy(x : Int) = value
+          def isDefinedAt(n : Int) = isDefined
+          def appy(n : Int) = value
         }
       }
     }}

@@ -19,12 +19,12 @@ object SortKthDistance {
 
     val n = ar.size
 
-    if ((k != 1) && (!(n isPower k) || !(n isEven))) throw new Exception("n not even or k does not divide array x * n times (k^x) != n n = " + n)
+    if ((k != 1) && (!(n isPower k) || !(n isEven))) throw new Exception("n not even or k does not divide array n * n times (k^n) != n n = " + n)
 
     for (y <- (0 until n/k) by 2) {
       for (x <- (0 until k)) {
 
-        println("x = " + x + ", y = " + y)
+        println("n = " + x + ", y = " + y)
         swap(ar, (y * k) + x, (y * k) + x + k)
       }
     }

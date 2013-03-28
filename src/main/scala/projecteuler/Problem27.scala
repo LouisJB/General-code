@@ -11,7 +11,7 @@ object Problem27 {
   }
 
   def findQuadratic(i : Int) {
-    //println("test = " + checkPrimes(x => x*x - 61 * x + 971))
+    //println("test = " + checkPrimes(n => n*n - 61 * n + 971))
     //return
     println("test = " + checkPrimes(x => x*x + x + 41))
     println("test = " + checkPrimes(x => x*x - 79 * x + 1601))
@@ -29,7 +29,7 @@ object Problem27 {
 
           if (x > max) {
             max = x
-            println("Max at a = " + a + ", b = " + b + ", x = " + x
+            println("Max at a = " + a + ", b = " + b + ", n = " + x
                     + ", product = " + (a * b))
           }
         }

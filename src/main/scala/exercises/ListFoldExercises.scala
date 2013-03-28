@@ -125,7 +125,7 @@ object Exercises {
   // Total: 4
   def sum(is: List[Int]): Int =
     List.reduceLeft(is, (x: Int, y: Int) => (x + y))
-    //List.foldLeft(is, 0, (x: Int, y: Int) => (x + y))
+    //List.foldLeft(is, 0, (n: Int, y: Int) => (n + y))
 
   // Exercise 3
   // Relative Difficulty: 2

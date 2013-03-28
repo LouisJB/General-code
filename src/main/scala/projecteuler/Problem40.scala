@@ -24,7 +24,7 @@ object Problem40 {
     for (d <- 0 to 6) {
       val p = math.pow(10, d).toInt
       val x = s.charAt(p - 1).toString.toInt
-      println("d = " + d + ", x = " + x)
+      println("d = " + d + ", n = " + x)
       ls = x :: ls
     }
 
@@ -42,10 +42,10 @@ object Problem40 {
       val x = (s - p) / d
       val r = x.toInt % d
       val y = x.toString.charAt(r).toString.toInt
-      println("x = " + x + ", r = " + r + ", y = " + y)
+      println("n = " + x + ", r = " + r + ", y = " + y)
       ls = y :: ls
       p = p + s * d
-      println("x = " + x + ", s = " + s + ", p = " + p)
+      println("n = " + x + ", s = " + s + ", p = " + p)
     }
 
     println("ls = " + ls.mkString(", "))

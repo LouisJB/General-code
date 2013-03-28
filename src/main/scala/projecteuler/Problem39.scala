@@ -12,7 +12,7 @@ object Problem39 {
   def findMax(n : Int) {
 
     // run through each of the values, then sort desc
-    //val r = (1 to n).map(x => (x, findCombs(x).length)).sortWith((a, b) => a._2 > b._2)
+    //val r = (1 to n).map(n => (n, findCombs(n).length)).sortWith((a, b) => a._2 > b._2)
 
     val r = (1 to n).map(x => (x, findCombs(x).length))
       .reduceLeft((a, b) => if (a._2 > b._2) a else b)

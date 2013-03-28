@@ -13,7 +13,7 @@ object Problem4 {
         val x = (i * j).toString()
         val y = x.substring(0, x.length/2)
         val z = x.substring(x.length/2, x.length).reverse
-        println("i = " + i + ", j = " + j + ", x = " + x + ", y = " + y + ", z = " + z)
+        println("i = " + i + ", j = " + j + ", n = " + x + ", y = " + y + ", z = " + z)
 
         if (y == z) {
           if ((i*j) > max) {

@@ -151,7 +151,7 @@ case class RichInt(n : Int) {
   def ≋(a : Int, m : Int) = a % m == n % m
  
   def p(r : Int) : Int = (RichInt(n)!) / (RichInt(n - r)!)
-  def c(r : Int) : Int = p(r) / (RichInt(r)!) // (RichInt(n - r)!) / (RichInt(RichInt(n - r)!) x (RichInt(r)!))
+  def c(r : Int) : Int = p(r) / (RichInt(r)!) // (RichInt(n - r)!) / (RichInt(RichInt(n - r)!) n (RichInt(r)!))
 }
 
 object RichInt {

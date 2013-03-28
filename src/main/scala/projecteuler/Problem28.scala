@@ -15,7 +15,7 @@ object Problem28 {
       for (s <- 1 to 4) {
         p = p + (d-1)
         x = x + p
-        //println("adding p to, p = " + p + " x = " + x)
+        //println("adding p to, p = " + p + " n = " + n)
       }
     }
     x

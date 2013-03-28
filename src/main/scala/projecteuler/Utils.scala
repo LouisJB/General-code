@@ -67,7 +67,7 @@ object Utils {
 
     ls match {
       case Nil => Nil
-      case x :: xs => xs.head :: x :: xs.tail
+      case n :: xs => xs.head :: n :: xs.tail
     }
   }*/
 

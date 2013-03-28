@@ -35,8 +35,8 @@ object TreeObj {
     case None => 0
     case Some(x) =>
       zeroIfNoneVal(x.left, size(x.left)) + zeroIfNoneVal(x.right, size(x.right)) + 1
-      //zeroIfNone(x.left, (_:Tree[Any]) => (size(x.left))) +
-      //zeroIfNone(x.right, (_:Tree[Any]) => (size(x.right))) + 1
+      //zeroIfNone(n.left, (_:Tree[Any]) => (size(n.left))) +
+      //zeroIfNone(n.right, (_:Tree[Any]) => (size(n.right))) + 1
   }
 
   /**
@@ -170,7 +170,7 @@ object TreeObj {
                / \
               2   3
              / \ / \
-            4  x 5  6
+            4  n 5  6
            
     */
 

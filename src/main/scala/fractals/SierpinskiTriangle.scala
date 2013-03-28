@@ -47,20 +47,20 @@ class SierpinskiTriangleApplet extends Applet {
       g.drawLine(p2.x, p2.y, p3.x, p3.y)
 
       draw(g,
-            new Point((p1.x + p2.x) / 2 + (p2.x - p3.x) / 2, //x coordinate of first corner
+            new Point((p1.x + p2.x) / 2 + (p2.x - p3.x) / 2, //n coordinate of first corner
             (p1.y + p2.y) / 2 + (p2.y - p3.y) / 2), //y coordinate of first corner
-            new Point((p1.x + p2.x) / 2 + (p1.x - p3.x) / 2, //x coordinate of second corner
+            new Point((p1.x + p2.x) / 2 + (p1.x - p3.x) / 2, //n coordinate of second corner
             (p1.y + p2.y) / 2 + (p1.y - p3.y) / 2), //y coordinate of second corner
-            new Point((p1.x + p2.x) / 2, //x coordinate of third corner
+            new Point((p1.x + p2.x) / 2, //n coordinate of third corner
             (p1.y + p2.y) / 2)  //y coordinate of third corner
         )
 
        draw(g,
-            new Point((p3.x + p2.x) / 2 + (p2.x - p1.x) / 2, //x coordinate of first corner
+            new Point((p3.x + p2.x) / 2 + (p2.x - p1.x) / 2, //n coordinate of first corner
             (p3.y + p2.y) / 2 + (p2.y - p1.y) / 2), //y coordinate of first corner
-            new Point((p3.x + p2.x) / 2 + (p3.x - p1.x) / 2, //x coordinate of second corner
+            new Point((p3.x + p2.x) / 2 + (p3.x - p1.x) / 2, //n coordinate of second corner
             (p3.y + p2.y) / 2 + (p3.y - p1.y) / 2), //y coordinate of second corner
-            new Point((p3.x + p2.x) / 2, //x coordinate of third corner
+            new Point((p3.x + p2.x) / 2, //n coordinate of third corner
             (p3.y + p2.y) / 2)  //y coordinate of third corner
         )
     }

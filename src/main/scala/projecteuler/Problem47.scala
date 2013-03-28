@@ -17,7 +17,7 @@ object Problem47 {
     println("pf2 = " + pf2.mkString(","))
     
     val x = findPf(3, 3)
-    println("x = " + x)
+    println("n = " + x)
 
     val y = findPf(4, 4)
     println("y = " + y)

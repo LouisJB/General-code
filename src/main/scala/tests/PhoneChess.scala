@@ -221,7 +221,7 @@ object Pieces {
       // 8 L-shapped moves (2 ((2,1)(1,2) in each quadrant)
       var moves : List[Pos] = Nil
 
-      for (xFlip <- -1 to 1 by 2) {   // x symmetry +/- 1
+      for (xFlip <- -1 to 1 by 2) {   // n symmetry +/- 1
         for (yFlip <- -1 to 1 by 2) { // y symmetry +/- 1
           val pos1 = currentPos + Pos((2 * xFlip), (1 * yFlip))
           if (validMove(pos1)) moves = pos1 :: moves
@@ -234,7 +234,7 @@ object Pieces {
   }
 }
 
-// simple x-y position class
+// simple n-y position class
 case class Pos(x : Int, y : Int) {
 
   def isRow(row : Int) = y == row
@@ -242,7 +242,7 @@ case class Pos(x : Int, y : Int) {
   def +(x : Int, y : Int) = new Pos(this.x + x, this.y + y)
   def +(pos : Pos) = new Pos(this.x + pos.x, this.y + pos.y)
 
-  override def toString() = "{x = " + x + ", y = " + y + "}"
+  override def toString() = "{n = " + x + ", y = " + y + "}"
 }
 
 // Key conversion from digit character

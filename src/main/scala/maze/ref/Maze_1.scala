@@ -176,7 +176,7 @@ class MazeModel2 {
     val exit = new Point(WIDTH - 1, HEIGHT - 1)
 
     // 2.8+ avoid var using Stream
-    // Stream.iterate(cells(exit.x)(exit.y))(_.pi).takeWhile(_ != null)
+    // Stream.iterate(cells(exit.n)(exit.y))(_.pi).takeWhile(_ != null)
     Utils.iterate(cells(exit.x)(exit.y))(_.pi).takeWhile(_ != null).foreach{
       n => {
         n.trail = Forward
@@ -186,7 +186,7 @@ class MazeModel2 {
 
     // working fine but replaced with the above to avoid unnecessary var
     /*
-    var n = cells(exit.x)(exit.y)
+    var n = cells(exit.n)(exit.y)
 
     while (n != null) {
 
@@ -455,7 +455,7 @@ object Utils2 {
     case _ => xs.flatMap(x => permute(xs.filter(_ != x)).map(x :: _))
   }
 
-  // make a stream of x, f(x), f(f(x)), etc.
+  // make a stream of n, f(n), f(f(n)), etc.
   // in Haskell this is called "iterate".  it ought to be in the standard library
   // as Stream.iterate.  "unfold" should be more general, but nonetheless I'm
   // going to call this unfold for the moment...

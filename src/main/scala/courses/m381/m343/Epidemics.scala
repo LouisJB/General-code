@@ -21,11 +21,25 @@ case object NumericalIntegrator {
     val fn : (Double) => Double = (x : Double) => pow((1.0 - (x / 100.0)), 3.0)
     val ni1 = NumericalIntegrator()(fn)
     val di1 = ni1.definiteIntegral(0.0, 100.0)
-    // should be [ -100 * 1/4 ( 1 - x/100)^5  ]0-100 = (-25 * (1 - 1) = 0 ) - -25 = +25
+    // should be [ -100 * 1/4 ( 1 - n/100)^5  ]0-100 = (-25 * (1 - 1) = 0 ) - -25 = +25
     println("di1 = " + di1)
   }
 }
 
+case class LifeTable(fn : Double => Double, a : Double, b : Double) {
+  def e0 = {
+    val ni1 = NumericalIntegrator()(fn)
+    ni1.definiteIntegral(a, b)
+  }
+}
+object LifeTable {
+  def main(args : Array[String]) = {
+    val fn : (Double) => Double = (x : Double) => pow((1.0 - (x / 100.0)), 3.0)
+    val lt1 = LifeTable(fn, 0.0, 100.0)
+    val e0 = lt1.e0
+    println("e0 = " + e0)
+  }
+}
 case class StochasticSimpleEpidemic(b : Double, n : Int, y0 : Int) {
   def by(y : Int) = (b * y * (n+1-y) ) / n
   def betas = (y0 to n).map(y => (y, by(y)))
@@ -48,7 +62,8 @@ case class DeterministicGeneralEpidemic(β : Double, γ : Double, n : Int, y0 : 
 
   // max y simultaneous infectives
   def yMax = y0 + x0 - ρ - ρ * log(x0 / ρ)
-  // survivor x at ∞ populuation
+
+  // survivor n at ∞ populuation (linear iterative solution method)
   def xAtInf(xj : Double, maxDepth : Int, delta : Double = 1E-06) : Double = {
     if (maxDepth == 0)
       xj

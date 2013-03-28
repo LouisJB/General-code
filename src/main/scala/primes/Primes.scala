@@ -2,7 +2,7 @@ package primes {
 
   /* From Haskell...
      primes = sieve [2..]
-     sieve (p : xs) = p : sieve [x | x <− xs, x `mod` p > 0]
+     sieve (p : xs) = p : sieve [n | n <− xs, n `mod` p > 0]
   */
 
   object Primes1 {

@@ -2,8 +2,7 @@ package courses.m381.m343
 
 import scala.{Int, PartialFunction}
 import math._
-import cern.jet.random.Normal
-import finance.pricing.RandomVariables
+import MathUtils._
 
 object Probability extends App {
   import math._
@@ -107,7 +106,7 @@ object Probability extends App {
     case z if z >= 0 => ((E pow (-1.0 * μ)) * (μ pow z)) / (z!)
   }
 
-  // cdf (P(X <= x)
+  // cdf (P(X <= n)
   def poissonCdf(μ : Double) : ~>[Int, Double] = {
     case k if k >= 0 =>
       ((E pow (-1.0 * μ)) * (0 to k).map(i => ((μ pow i) / (i!))).sum) //(0 until k).map(poisson(u)).sum
@@ -133,7 +132,7 @@ object Probability extends App {
   }
   
   /**
-   * exponential X ∼ M(λ), f(x) = λe^(−λx), x >= 0
+   * exponential X ∼ M(λ), f(n) = λe^(−λx), n >= 0
    * 
    */
   def exponentialPdf(λ : Double) : ~>[Double, Double] = {
@@ -156,7 +155,7 @@ object Probability extends App {
   }
 
   /**
-   * Normal X ∼ N(μ, σ^2), f(x) ; x ∈ R
+   * Normal X ∼ N(μ, σ^2), f(n) ; n ∈ R
    */
   def Npdf(μ : Double)(σ : Double) : ~>[Double, Double] = {
     case x => 1.0 / (σ * sqrt(2.0 * Pi)) * exp(-(pow(x - μ, 2.0) / (2.0 * σ * σ)))
@@ -194,7 +193,7 @@ object TestProbability {
 
     val x4 = 1.0 - ((E pow (-1.0 * μ)) * (0 to 2).map(i => ((μ pow i) / (i!))).sum)
 
-    println("x1 = " + x1 + ", x2 = " + x2 + ", x3 = " + x3 + ", x4 = " + x4)
+    println("n = " + x1 + ", x2 = " + x2 + ", x3 = " + x3 + ", x4 = " + x4)
 
     (0 to 10).map(x => (x, p(x), f2(x))).foreach(println)
 
@@ -283,7 +282,7 @@ case class BrownianMotion(
   def pdf(t : Double) : Double => Double = distrib(t).pdf _
   def cdf(t : Double) : Double => Double = distrib(t).cdf _ // - (μ * t))
 
-  // markov property, cdf of X <= x at T, given a previous observation of X(t2) = x2
+  // markov property, cdf of X <= n at T, given a previous observation of X(t2) = x2
   def pLessThanXatTgivenObservation(t : Double, x : Double, ob : ObservedValue) =
     (x : Double) => normal(0, sqrt(diffusionCoefficient * (t - ob.time))).cdf(x - ob.value)
 
@@ -294,17 +293,48 @@ case class BrownianMotion(
     normal(μc, sqrt(σ2c))
   }
 
-  // Wa - waiting times for first attained values of x >= x (a > 0)
+  // Wa - waiting times for first attained values of n >= n (a > 0)
   // Fw(w)
   def FwCdf(a : Double) =
     (w : Double) => 2.0 * (1.0 - normal(0.0, sqrt(diffusionCoefficient * w)).cdf(a))
 
+  // inverse normal
   def fwPdf(a : Double) =
     (w : Double) => (a / (w * sqrt(2.0 * Pi * w * diffusionCoefficient))) * (exp(-1.0 * (a pow 2)) / (2 * diffusionCoefficient * w))
 }
 
+case class GeometricBrownianMotion(
+   diffusionCoefficient : Double,    // σ^2
+   μ : Double = 0.0                  // drift coefficient
+) extends LogNormalBrownianMotion {
+
+  def pdf(t : Double) : Double => Double = (x : Double) => 0
+  def cdf(t : Double) : Double => Double = (x : Double) => 0
+
+  def mean(t : Double) = μ * t
+  def variance(t : Double) = diffusionCoefficient * t
+  def stdDev(t : Double) = sqrt(variance(t))
+
+
+  def simulatedValues(ls : List[Double], t : Double) : List[Double] = {
+    val n = (diffusionCoefficient * t) / ls.size
+    val z = sqrt(n)
+
+    //val d = normal(0, (diffusionCoefficient) * n)
+    val xs = ls.map(x => x * z)
+
+    def recurse(ls : List[Double]) : List[Double] = {
+      if (ls.isEmpty)
+        Nil
+      else
+        ls.sum :: recurse(ls.tail)
+    }
+    val cs : List[Double] = recurse(xs.reverse).reverse
+    cs.map(x => exp(x))
+  }
+}
+
 object WienerProcesses extends App {
-  import MathUtils._
   val b1 = BrownianMotion(0.3) // var = σ^2 = 0.3 per timeunits^2
   val p1 = 1 - b1.cdf(30)(5) // position > 5 after 30 time units
   assertAlmostEqual(p1, 0.048, "BM(σ^2 = 0.3); P(X(30) > 5)")
@@ -322,11 +352,60 @@ object WienerProcesses extends App {
   val b2 = BrownianMotion(6, 2)
   val p5 = b2.cdf(5)(15) - b2.cdf(5)(-15)
   assertAlmostEqual(p5, 0.819, "DP(6, 2) P(−15 < D(5) < 15)")
+
+  val b3 = BrownianMotion(4)
+  val d1 = b3.conditionalDistribution(ObservedValue(0, 0), ObservedValue(180, 0))(120)
+  val p6 = d1.cdf(10) - d1.cdf(-10)
+  println("cond prob = " + p6)
+
+  val p7 = b3.FwCdf(10)(30)
+  println("p7 = " + p7 + ", 1-p7 = " + (1-p7))
+
+
+  val g1 = GeometricBrownianMotion(0.25, 1)
+  val ls = List(0.2838, 1.2018, 1.0086, -1.4728)
+  val rs = g1.simulatedValues(ls, 1)
+  println("rs = " + rs)
+
+  val g2 = GeometricBrownianMotion(0.12, 0)
+  val rs2 = g2.simulatedValues(List(0.7877, -1.1089, 0.4011), 1)
+  println("rs2 = " + rs2 + ", " + rs2.map(_ * 50))
 }
 
 object MathUtils {
   def assertAlmostEqual(value : Double, expectedValue : Double, msg : String = "", tol : Double = 1E-2) = {
     println(msg + " " + value)
     assert(abs(value - expectedValue) <= tol, "Value %f not equal to expected value %f with given tolerance %f".format(value, expectedValue, tol))
+  }
+}
+
+import Probability._
+
+trait Distrib {
+  def Ex(n : Int) : Double
+  def Vx(n : Int) : Double
+}
+case class SimpleRandomWalk(p : Double) extends Distrib {
+  val q = 1-p
+  def Ex(n : Int) = n * (p - q)
+  def Vx(n : Int) = 4 * n * p * q
+
+  def px(n : Int) : (Int => Double) = {
+    case (x : Int) if ((n - x) % 2 == 0) && (((-1 * n) <= x) && (x <= n)) => binomial(n)((n+x)/2) * (p pow ((n+x)/2)) * (q pow ((n-x)/2))
+    case _ => 0
+  }
+}
+
+object SimpleRandomWalk {
+  def main(args : Array[String]) {
+    val srw1 = SimpleRandomWalk(0.6)
+    val p1 = srw1.px(7)(3)
+    println("p(X7 = 3) =  = " + p1)
+
+    val p2 = srw1.px(8)(-2)
+    println("p(X8 = -2) = " + p2)
+
+    println("p(X7 = -2) = " + srw1.px(7)(-2))
+    println("p(X10 = 6) = " + srw1.px(10)(6))
   }
 }

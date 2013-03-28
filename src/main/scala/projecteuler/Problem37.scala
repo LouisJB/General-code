@@ -44,7 +44,7 @@ object Problem37 {
     var res = subdigits.forall(y => {
             val x = BigInt(y.mkString)
             isPrime(x)
-            //println("checking x = " + x + ", res = " + res)
+            //println("checking n = " + n + ", res = " + res)
     })
 
     res

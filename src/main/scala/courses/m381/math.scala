@@ -21,7 +21,7 @@ object M381 {
   def gcd(a : Int, b : Int) : Int = if (b == 0) a else gcd(b, a % b)
   def gcdl(ls : List[Int]) : Int = ls.foldLeft(ls.head)((a : Int, b : Int) => gcd(a, b))
 
-  // theorem 4.8, lcm(a, b) x gcd(a, b) = ab
+  // theorem 4.8, lcm(a, b) n gcd(a, b) = ab
   def lcm(a : Int, b : Int) : Int = (a * b) / gcd(a, b)
   def lcml(ls : List[Int]) : Int = ls.distinct.foldLeft(1)(_ * _) / gcdl(ls)
 
@@ -258,7 +258,7 @@ object M381 {
       case 1 => 1 :: Nil
       case x if isSquare(x) => x :: Nil
       case x => {
-        //println("%d".format(x))
+        //println("%d".format(n))
         //val v = sqrt(n).toInt; v*v :: findSquares(n-v*v)
         (sqrt(n).toInt to 1 by -1).map(z => z*z :: findSquares(n-z*z)).minBy(_.size)
       }
@@ -677,4 +677,100 @@ object Collatz {
 //Polynomials.main(args)
 //M381.main(args)
 
+import courses.m381.m343.Probability._
 
+object StirlingNumbers {
+  def fact(n : Long) : Long =  n match {
+    case _ if n < 0 => throw new IllegalArgumentException("Factorial undefined for n < 0")
+    case _ if n <= 1 => 1
+    case _ => (2L to n).reduceLeft(_ * _)
+  }
+  def binomial(n : Long)(k : Long) =
+    if (k > n) throw new IllegalArgumentException("k can not be greated then n") else (fact(n)) / ((fact(k)) * (fact(n-k)))
+
+  def secondKind(n : Long)(k : Long) : Long =
+    (0L to k).map(j => (pow(-1, k - j)).toLong * binomial(k)(j) * pow(j, n).toLong).sum / fact(k)
+
+  def main(args : Array[String]) {
+    println("stirling2nd 5 = " + secondKind(5)(2))
+  }
+}
+
+object BellNumbers {
+  import StirlingNumbers._
+  def bell(n : Long) = {
+    val secondKind_ = secondKind(n) _
+    (0L to n).map(k => secondKind_(k)).sum
+  }
+
+  def main(args : Array[String]) {
+    println("bell 1..10 = " + (1 to 10).map(x => (x, bell(x))).mkString(", "))
+
+    println((1 to 10).foreach(x => {
+
+      val y = bell(x)
+      println(x, y, y % 1000)
+    }))
+  }
+}
+
+object PentagonalNumbers {
+  // generates the 0, 1, -1, 2, -2... sequence for the generalised pentagonal numbers, from a 0..n sequence of integers
+  def sequenceNo(n : Long) =
+    if ((n % 2) == 0) -1 * (n+1)/2 else (n+1)/2
+  // bog standard pentagonal numbers
+  def pentagonalNumber(n : Long) : Long =
+    n * ((3 * n) - 1) / 2
+  // generalised pentagonal numbers
+  def generalisedPentagonalNumber(n : Long) =
+    pentagonalNumber(sequenceNo(n))
+
+  def main(args : Array[String]) = {
+    println("Seq: " + (0 to 10).map(x => (x, sequenceNo(x))))
+    println("gen pent: " + (0 to 10).map(x => (x, generalisedPentagonalNumber(x))))
+    assert(sequenceNo(100) == -50)
+    assert(pentagonalNumber(100)== 14950)
+    assert(generalisedPentagonalNumber(100) == 3775)
+  }
+}
+object Partitions {
+  import PentagonalNumbers._
+
+  def termSign(termNo : Long) =
+    if ((((termNo)/2) % 2) == 0) 1 else -1
+
+  // find partition size with given modulus, making use of the recurrence relation;
+  //   p(k) = p(k − 1) + p(k − 2) − p(k − 5) − p(k − 7) + p(k − 12) + p(k − 15) − p(k − 22) − ...
+  def findPart(mod : Int) = {
+    var arr = Array[Long](1) // start with p(0) = 1
+    def generator(n : Int) = {
+      var r = 0L
+      (0L to n).find(i => {
+        val k = generalisedPentagonalNumber(i+1)
+        if (k > n) true
+        else {
+          val sign = termSign(i)
+          val prev = arr((n - k).toInt)
+          r = (r + (prev * sign)) % mod
+          false
+        }
+      })
+      arr = arr ++ Array(r)
+      r
+    }
+    (1 to Int.MaxValue).find(x => {
+      val p = generator(x)
+      if (p % mod == 0) {
+        println(x, p)
+        true
+      }
+      else false
+    })
+  }
+
+  def main(args : Array[String]) {
+    (1 to 10).foreach(x => println(x, termSign(x)))
+    assert(termSign(10) == -1)
+    assert(findPart(10) == Some(9))
+  }
+}

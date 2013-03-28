@@ -32,6 +32,6 @@ object Main {
 
     case Nil => lst
     case x :: xs =>
-      reverseList(xs) ::: List(x) // append to tail by making new list of x
+      reverseList(xs) ::: List(x) // append to tail by making new list of n
   }
 }

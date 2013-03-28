@@ -21,15 +21,15 @@ object Problem44 {
       println("Answer = " + ans)
 
       /*
-      //val ans = pents.find(p1 => pents.find(p2 => checkPent(p1, p2)) match {case Some(x) => true; case _ => false })
+      //val ans = pents.find(p1 => pents.find(p2 => checkPent(p1, p2)) match {case Some(n) => true; case _ => false })
 
       val pentsZip = pents.zipWithIndex
 
-      for (x1 <- pentsZip) {
-        for (x2 <- pents.drop(x1._2 + 1)) {
-          println(x1)
-          if (checkPent(x1._1, x2)) {
-            println("p1 = " + x1._1 + ", p2 = " + x2)
+      for (n <- pentsZip) {
+        for (x2 <- pents.drop(n._2 + 1)) {
+          println(n)
+          if (checkPent(n._1, x2)) {
+            println("p1 = " + n._1 + ", p2 = " + x2)
             return
           }
         }

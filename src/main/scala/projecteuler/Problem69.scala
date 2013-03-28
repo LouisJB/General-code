@@ -34,7 +34,7 @@ object Problem69 {
           val m = x.toDouble / t.toDouble;
           if (m >= max) {
             max = m
-            println("x = " + x + ", " + max)
+            println("n = " + x + ", " + max)
           }
         }
       }       )

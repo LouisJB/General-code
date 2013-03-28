@@ -111,7 +111,7 @@ object Division {
     def printRes(n : Int, d : Int, x : Double) {
 
       println("dividing " + n + " by " + d + " = " + x + " mod = " + n % x
-        + " - check: (x+r/d)*d = " + (x + (n % x)/d) * d)
+        + " - check: (n+r/d)*d = " + (x + (n % x)/d) * d)
     }
 
     println("<<Division")

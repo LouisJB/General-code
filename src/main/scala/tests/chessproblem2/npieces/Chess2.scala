@@ -281,7 +281,7 @@ object Pieces {
   }
 }
 
-// simple x-y position class
+// simple n-y position class
 case class Pos(x : Int, y : Int) {
 
   def isRow(row : Int) = y == row

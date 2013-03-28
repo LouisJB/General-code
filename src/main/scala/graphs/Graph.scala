@@ -64,7 +64,7 @@ object GraphApp {
 
     //var vQ : PriorityQueue[Vertex] = new PriorityQueue[Vertex]()(
     //  new Ordering[Vertex] {
-    //    def compare(x: Vertex, y : Vertex) : Int = y.distance compare x.distance})
+    //    def compare(n: Vertex, y : Vertex) : Int = y.distance compare n.distance})
 
     var vQ : PriorityQueue[Vertex] = new PriorityQueue[Vertex]()(
       Ordering.fromLessThan[Vertex](_.distance > _.distance))

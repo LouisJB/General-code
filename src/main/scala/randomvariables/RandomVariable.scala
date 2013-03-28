@@ -194,7 +194,7 @@ case class GeneralisedWienerRandomVariable(
   }
 }
 
-// Random variable that follows an Ito process using functions of x and t for mean and standard-dev
+// Random variable that follows an Ito process using functions of n and t for mean and standard-dev
 case class ItoRandomVariable(
         value : Double,
         meanFn : (Double, Double) => Double,

@@ -102,7 +102,7 @@ case class BinomialTreeOptionPricing(
 object BinomialTreeOptionPricing extends App {
   import BlackScholes._
 
-  def formatParams(s : Double, x : Double, t : Double, r : Double, σ : Double) = "Running s2, s = %.2f, x = %.2f, t = %.2f, r = %.2f, σ = %.2f".format(s, x, t, r, σ)
+  def formatParams(s : Double, x : Double, t : Double, r : Double, σ : Double) = "Running s2, s = %.2f, n = %.2f, t = %.2f, r = %.2f, σ = %.2f".format(s, x, t, r, σ)
   
   def s1() {
     val s = 100.0
