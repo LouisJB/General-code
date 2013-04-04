@@ -1,9 +1,18 @@
 package projecteuler
 
-import java.lang.Math._
-import scala.annotation.tailrec
-
 object Utils {
+
+  def answerWithTime(msg : String, ansMsg : String)(bodyFn : => String) = {
+    println(msg + " starting...")
+    val startMs = System.currentTimeMillis()
+    val ans = bodyFn
+    println((msg + ", completed. Answer = %s (took %sms)").format(ans, System.currentTimeMillis() - startMs))
+    ans
+  }
+  def assertDone(res : Boolean, msg : String = "") = {
+    assert(res, msg)
+    println("Answer validated")
+  }
 
   def fix[A,B](f: (A=>B)=>(A=>B)): A=>B = f(fix(f))(_)
 
