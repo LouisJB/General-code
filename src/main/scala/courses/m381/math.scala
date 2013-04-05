@@ -9,6 +9,11 @@ exec scala "$0" "$@"
 import scala.math._
 import scala.annotation.tailrec
 import scala.util.Random
+import scala._
+import math.BigDecimal
+import math.BigInt
+import math.Numeric
+import scala.Some
 
 object M381 {
 
@@ -119,36 +124,51 @@ object M381 {
   case class FCF(ls : List[Int]) { 
     override def toString = "[%s]".format(ls.mkString(", "))
     def fcf = fcfc(ls)
-    def apply() : Double = fcf(ls).reverse.headOption.map(x => Convergent(x._1, x._2)()).getOrElse(0.0)
+    def apply() : Double = fcf(ls.map(_.toLong)).reverse.headOption.map(x => Convergent(x._1, x._2, x._3)()).getOrElse(0.0)
     
-    def fcf(ls : List[Int]) = {
-      def fcf2(ls : List[Int], rs : List[(Int, Int)]) : List[(Int, Int)] = {
-        println("%s, %s".format(ls.mkString(","), rs.mkString(",")))
-        rs match {
-          case Nil => ls match {
-            case Nil => rs
-            case h :: t => fcf2(t, (h, 1) :: rs)
+    def fcf(ls : List[Long]) = {
+      def fcf2(continuedFractions : List[BigInt], convergents : List[(Int, BigInt, BigInt)]) : List[(Int, BigInt, BigInt)] = {
+        //println("%s, %s".format(continuedFractions.mkString(","), convergents.mkString(",")))
+        convergents match {
+          case Nil => continuedFractions match {
+            case Nil => convergents
+            case cfh :: cft => fcf2(cft, (1, cfh, BigInt(1)) :: convergents)
           }
-          case h :: Nil => ls match {
-            case Nil => rs
-            case h2 :: t => fcf2(t, (h2 * h._1 + 1, h2) :: rs)
+          case cvh :: Nil => continuedFractions match {
+            case Nil => convergents
+            case cfh :: cft => fcf2(cft, (cvh._1+1, cfh * cvh._2 + 1, cfh) :: convergents)
           }
-          case h :: hh :: t => ls match { 
-            case Nil => rs
-            case h2 :: tail => fcf2(tail, (h2 * h._1 + hh._1, h2 * h._2 + hh._2) :: rs)
+          case cvh :: cht :: _ => continuedFractions match {
+            case Nil => convergents
+            case cfh :: cft => fcf2(cft, (cvh._1+1, cfh * cvh._2 + cht._2, cfh * cvh._3 + cht._3) :: convergents)
           }
         }
       }
-      fcf2(ls, Nil).reverse
+      fcf2(ls.map(BigInt(_)), Nil).reverse
     }
-    def fcfc(ls : List[Int]) : List[(Int, Convergent)] = fcf(ls).zipWithIndex.map(e => (e._2 + 1, Convergent(e._1._1, e._1._2)))
+    def fcfc(ls : List[Int]) : List[Convergent] =
+      fcf(ls.map(_.toLong)).zipWithIndex.map{ case (c, idx) => Convergent(c._1, c._2, c._3)}
   }
   object FCF {
     implicit def toFCF(ls : List[Int]) = FCF(ls)
+
+    def eCfSeqGen(termNo : Int) : List[Int] = 2 :: {
+      (2 to termNo).map(x => {
+        if (x % 3 == 0)
+          2*x/3
+        else
+          1
+      })
+    }.toList
   }
-  case class Convergent(n : Int, q : Int) {
-    override def toString() = "%s/%s".format(n, q)
-    def apply() : Double = n.toDouble / q.toDouble
+  case class Convergent(termNo : Int, n : BigInt, q : BigInt) {
+    override def toString() = "Term %d: %s/%s".format(termNo, n, q)
+    def apply() : Double = (BigDecimal(n) / q.toDouble).toDouble
+    def reduced : (Long, Convergent) = {
+      val wholeParts = (n/q).toLong
+      val remainder = n%q
+      (wholeParts, Convergent(termNo, remainder, q))
+    }
   }
   
   def cf(ls : List[Double]) : Double = ls match { case Nil => 0; case h :: t => h + 1/cf(t) }

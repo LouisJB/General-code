@@ -25,3 +25,14 @@ object Maths {
 
   def gcd(a : Int, b : Int) : Int = if (b == 0) a else gcd(b, a % b)
 }
+
+
+case class RichBigInt(n : BigInt) {
+  def digitsSum = {
+    val str = n.toString
+    str.toCharArray.map(_.asDigit).sum
+  }
+}
+object RichBigInt {
+  implicit def toRichBigInt(n : BigInt) = RichBigInt(n)
+}
